@@ -109,7 +109,7 @@ Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `go
 
 All exported files are saved to an `ascii/` folder in the current working directory (created automatically).
 
-- **Text**: print FIGlet output directly. If exported to file, show the path.
+- **Text**: the script prints to stdout — do NOT repeat the ASCII art in your response, it's already visible in the terminal output. If exported to file, show the path.
 - **Image**: show file path and use Read tool to display inline if possible.
 - **Video**: first frame PNG + animated GIF. Show file paths.
 
