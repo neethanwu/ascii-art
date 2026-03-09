@@ -36,10 +36,8 @@ After detecting the input and parsing the user's message for pre-specified optio
 ### Strategy
 
 1. **Parse first** — extract any options the user already specified via natural language (see Natural Language Parsing section)
-2. **Build question list** — include ALL questions for the input type, skipping only options the user **explicitly** specified in their message
-3. **Always prompt** — never silently apply defaults. Every unspecified option must be presented to the user for confirmation. The only exceptions:
-   - User explicitly said "defaults" or "just do it" → use all defaults, skip prompting
-   - User explicitly said "random" or "surprise me" → skip prompting, use `--random`
+2. **Build question list** — include all questions for the input type, skipping options the user already specified in their message
+3. **Skip if resolved** — if everything is specified, or user said "defaults" / "just do it", skip prompting entirely. If user said "random" / "surprise me", skip and use `--random`. Otherwise, always prompt for every unspecified option — never silently apply defaults.
 4. **Batch into calls** — if ≤4 questions remain, use one `AskUserQuestion` call. If >4, split across multiple calls (ask the most impactful ones first: style, color, export).
 
 ### Question Templates
