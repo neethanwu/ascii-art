@@ -172,6 +172,24 @@ def _get_mono_font(size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default()
 
 
+def get_font_metrics(font_size: int = 10) -> tuple[int, float]:
+    """Return (char_width_px, char_aspect) for the monospace font at given size."""
+    font = _get_mono_font(font_size)
+    bbox = font.getbbox("M")
+    char_w = bbox[2] - bbox[0]
+    char_h = bbox[3] - bbox[1]
+    line_h = int(char_h * 1.1)
+    if char_w == 0:
+        return 8, 2.0  # fallback
+    return char_w, line_h / char_w
+
+
+def get_font_char_aspect(font_size: int = 10) -> float:
+    """Return the actual height/width ratio of the monospace font at given size."""
+    _, aspect = get_font_metrics(font_size)
+    return aspect
+
+
 def export_png(
     chars: list[list[str]],
     colors: np.ndarray,

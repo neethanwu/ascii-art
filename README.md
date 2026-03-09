@@ -9,7 +9,9 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 - **3 dithering algorithms**: Floyd-Steinberg, Bayer, Atkinson
 - **6 export formats**: txt, html, svg, png, gif, clipboard
 - **3 background modes**: dark, light, transparent
-- **Aspect ratio presets**: original, 16:9, 4:3, 1:1, 3:4, 9:16
+- **Aspect ratio presets**: original, 16:9, 4:3, 1:1, 3:4, 9:16 (center-crop)
+- **Adjustable character size**: `--font-size` controls density in image exports
+- **Auto-sizing**: output matches original image dimensions by default
 - **Text input**: FIGlet banners with 12 font choices
 - **Video input**: frame extraction with animated GIF export
 - **Random mode**: curated style combinations for surprise results
@@ -40,7 +42,20 @@ Trigger with `/ascii-art` in your agent:
 /ascii-art surprise me with photo.jpg
 ```
 
-The skill parses natural language — no need to remember flags. Just describe what you want.
+The skill parses natural language and presents all options interactively — just describe what you want, pick your settings, or reply "defaults" to go fast.
+
+## Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| Style | classic | Art style: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal |
+| Color | grayscale | Color mode: grayscale, full, matrix, amber, custom |
+| Background | dark | Background: dark, light, transparent |
+| Ratio | original | Aspect ratio crop: original, 16:9, 4:3, 1:1, 3:4, 9:16 |
+| Font size | 14 | Character size in pixels for image exports (bigger = larger chars, smaller = denser) |
+| Columns | auto | Output width in characters (auto preserves original image size) |
+| Dither | none | Dithering: none, floyd-steinberg, bayer, atkinson |
+| Export | auto | Format: txt, html, svg, png, gif, clipboard |
 
 ## How It Works
 

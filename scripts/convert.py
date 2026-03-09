@@ -38,6 +38,7 @@ from core.exporters import (
     export_gif,
     export_clipboard_text,
     export_clipboard_image,
+    get_font_metrics,
 )
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"}
@@ -110,11 +111,21 @@ def _apply_preset(args) -> None:
         args.dither_strength = 0.8
 
 
+def _get_font_params(args):
+    """Return (char_pixel_width, char_aspect) for pixel exports, (0, None) for text."""
+    if args.export in (None, "png", "gif", "clipboard", "html", "svg"):
+        return get_font_metrics(font_size=args.font_size)
+    return 0, None  # txt — use terminal defaults
+
+
 def _convert_with_style(args, img):
     """Core conversion logic shared by image and video paths."""
+    char_pixel_width, char_aspect = _get_font_params(args)
+
     if args.style == "braille":
         brightness_hi, colors_lo, char_rows, char_cols = process_image_for_braille(
             img, cols=args.cols, ratio=args.ratio, invert=args.invert,
+            char_aspect=char_aspect, char_pixel_width=char_pixel_width,
         )
         threshold = float(brightness_hi.mean())
         chars = braille_style(brightness_hi, threshold=threshold)
@@ -128,6 +139,7 @@ def _convert_with_style(args, img):
     elif args.style == "edge":
         magnitude, direction, colors_raw, rows, cols_out = process_image_for_edge(
             img, cols=args.cols, ratio=args.ratio, invert=args.invert,
+            char_aspect=char_aspect, char_pixel_width=char_pixel_width,
         )
         chars = edge_style(magnitude, direction)
         brightness = magnitude / magnitude.max() * 255 if magnitude.max() > 0 else magnitude
@@ -138,7 +150,7 @@ def _convert_with_style(args, img):
         )
 
     elif args.style == "block":
-        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert)
+        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
         dithered = apply_dither(grid.brightness, args.dither, levels=5, strength=args.dither_strength)
         chars = block_style(dithered)
         colors = apply_color(
@@ -148,7 +160,7 @@ def _convert_with_style(args, img):
         )
 
     elif args.style == "dot-cross":
-        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert)
+        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
         dithered = apply_dither(grid.brightness, args.dither, levels=10, strength=args.dither_strength)
         chars = dot_cross_style(dithered)
         colors = apply_color(
@@ -158,7 +170,7 @@ def _convert_with_style(args, img):
         )
 
     elif args.style == "halftone":
-        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert)
+        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
         dithered = apply_dither(grid.brightness, args.dither, levels=7, strength=args.dither_strength)
         chars = halftone_style(dithered)
         colors = apply_color(
@@ -174,7 +186,7 @@ def _convert_with_style(args, img):
             ramp = PRESETS[args.style]["ramp"]
         else:
             ramp = DEFAULT_RAMP
-        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert)
+        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
         dithered = apply_dither(grid.brightness, args.dither, levels=len(ramp), strength=args.dither_strength)
         chars = classic_ascii(dithered, ramp=ramp)
         colors = apply_color(
@@ -233,16 +245,19 @@ def convert_video(args) -> None:
         sys.exit(1)
 
     # Default export: PNG preview of first frame + GIF if multiple frames
+    fs = args.font_size
     if args.export is None:
         path = export_png(frames[0][0], frames[0][1], input_name,
-                         background=args.background, filename=args.filename)
+                         background=args.background, font_size=fs, filename=args.filename)
         print(f"Preview (first frame): {path}")
         if len(frames) > 1:
-            gif_path = export_gif(frames, input_name, background=args.background, fps=args.fps)
+            gif_path = export_gif(frames, input_name, background=args.background,
+                                 font_size=fs, fps=args.fps)
             print(f"Animated: {gif_path}")
     else:
         # args.export == "gif"
-        path = export_gif(frames, input_name, background=args.background, fps=args.fps, filename=args.filename)
+        path = export_gif(frames, input_name, background=args.background,
+                         font_size=fs, fps=args.fps, filename=args.filename)
         print(f"Exported: {path}")
 
 
@@ -275,12 +290,16 @@ def convert_text(args) -> None:
                              background=args.background, custom_color=args.custom_color)
 
         input_name = args.input[:20].replace(" ", "_")
+        fs = args.font_size
         if args.export == "html":
-            path = export_html(chars, colors, input_name, background=args.background, filename=args.filename)
+            path = export_html(chars, colors, input_name, background=args.background,
+                              font_size=fs, filename=args.filename)
         elif args.export == "svg":
-            path = export_svg(chars, colors, input_name, background=args.background, filename=args.filename)
+            path = export_svg(chars, colors, input_name, background=args.background,
+                             font_size=fs, filename=args.filename)
         else:
-            path = export_png(chars, colors, input_name, background=args.background, font_size=14, filename=args.filename)
+            path = export_png(chars, colors, input_name, background=args.background,
+                             font_size=fs, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "txt":
         input_name = args.input[:20].replace(" ", "_")
@@ -295,30 +314,33 @@ def convert_text(args) -> None:
 
 def _do_export(args, chars, colors, input_name):
     """Handle export for image conversion."""
+    fs = args.font_size
     if args.export == "txt":
         path = export_txt(chars, input_name, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "html":
         path = export_html(chars, colors, input_name,
-                          background=args.background, filename=args.filename)
+                          background=args.background, font_size=fs, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "svg":
-        path = export_svg(chars, colors, input_name, background=args.background, filename=args.filename)
+        path = export_svg(chars, colors, input_name, background=args.background,
+                         font_size=fs, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "clipboard":
-        png_path = export_png(chars, colors, input_name, background=args.background)
+        png_path = export_png(chars, colors, input_name, background=args.background,
+                             font_size=fs)
         if export_clipboard_image(png_path):
             print(f"Copied to clipboard! (also saved: {png_path})")
         else:
             print(f"Clipboard failed. Saved: {png_path}")
     elif args.export == "png":
         path = export_png(chars, colors, input_name,
-                         background=args.background, filename=args.filename)
+                         background=args.background, font_size=fs, filename=args.filename)
         print(f"Exported: {path}")
     else:
         # Default: PNG
         path = export_png(chars, colors, input_name,
-                         background=args.background, filename=args.filename)
+                         background=args.background, font_size=fs, filename=args.filename)
         print(f"Preview: {path}")
 
 
@@ -334,8 +356,8 @@ def main():
                         help="Input type (auto-detected if omitted)")
     parser.add_argument("--style", "-s", choices=ALL_STYLES,
                         default="classic", help="Art style (default: classic)")
-    parser.add_argument("--cols", "-c", type=int, default=80,
-                        help="Output width in characters (default: 80)")
+    parser.add_argument("--cols", "-c", type=int, default=0,
+                        help="Output width in characters (default: auto, preserves original image size)")
     parser.add_argument("--random", action="store_true",
                         help="Randomize style, color, and dither")
 
@@ -370,6 +392,8 @@ def main():
                         choices=["txt", "html", "svg", "png", "gif", "clipboard"],
                         help="Export format (default: auto)")
     parser.add_argument("--filename", "-o", help="Custom output filename")
+    parser.add_argument("--font-size", type=int, default=14,
+                        help="Character size in pixels for image exports (default: 14)")
 
     args = parser.parse_args()
 

@@ -27,25 +27,42 @@ Determine what the user wants to convert:
 3. **If the user provided plain text** (no file path, or file doesn't exist) → **text** (FIGlet banner)
 4. **If nothing provided** → ask: "What would you like to convert to ASCII art? You can provide text, an image path, or a video path."
 
-## Smart Defaults
+## Options Prompt
 
-Apply these defaults. Only ask the user if they didn't specify and the choice significantly affects output:
+After detecting the input, **always ask the user to configure their options** using a single AskUserQuestion call. Pre-fill any options the user already specified in their message (via natural language parsing below), and present the rest with defaults highlighted.
 
-| Option | Default | When to ask |
-|--------|---------|-------------|
-| Style | classic | Don't ask — user can request braille/block/edge |
-| Columns | 80 | Don't ask — works for most terminals |
-| Color | grayscale | Don't ask |
-| Dither | none | Don't ask |
-| Background | dark | Don't ask |
-| Ratio | original | Don't ask |
-| Font (text) | standard | Don't ask — user can specify |
-| FPS (video) | 10 | Don't ask |
-| Export | auto (text→stdout, image→png, video→gif) | Don't ask |
+Use this format:
+
+```
+Converting [filename/text] ([type]) to ASCII art.
+
+Pick your options (or reply "defaults" for all defaults, "random" for a surprise):
+
+1. Style: classic* | braille | block | edge | dot-cross | halftone | retro-art | terminal
+2. Color: grayscale* | full | matrix | amber | custom
+3. Background: dark* | light | transparent
+4. Ratio: original* | 16:9 | 4:3 | 1:1 | 3:4 | 9:16
+5. Font size: 14* (bigger = larger chars, smaller = denser art)
+6. Dither: none* | floyd-steinberg | bayer | atkinson
+7. Export: png* | html | svg | txt | gif | clipboard
+[8. Font (text only): standard* | doom | banner | slant | big | small | block | lean | mini | script | shadow | speed]
+[9. FPS (video only): 10*]
+
+* = default. Just list the numbers you want to change, e.g. "1. braille 2. matrix" or "defaults".
+```
+
+Rules:
+- Mark the default with `*` for each option
+- If the user already specified an option in their original message, show it as pre-selected with a checkmark: e.g. `1. Style: ~~classic~~ braille ✓ (from your request)`
+- Only show option 8 (Font) for text input and option 9 (FPS) for video input
+- If the user replies "defaults" or "default", use all defaults immediately
+- If the user replies "random" or "surprise me", use `--random` flag
+- If the user replies with partial changes like "1. braille 3. transparent", apply those and use defaults for the rest
+- Accept flexible response formats — numbered, comma-separated, or natural language like "braille with matrix color"
 
 ## Natural Language Parsing
 
-Parse the user's message for preferences. Examples:
+When parsing the user's original message, detect any pre-specified options:
 
 - "convert photo.jpg to braille" → style=braille
 - "halftone style" → style=halftone
@@ -56,7 +73,7 @@ Parse the user's message for preferences. Examples:
 - "sunset vibes" → color=custom, custom_color=#ff6347 (translate creative descriptions to hex)
 - "wider, 120 columns" → cols=120
 - "use doom font" → font=doom
-- "surprise me" or "random" → random mode
+- "surprise me" or "random" → skip options, use random mode
 - "invert it" → invert=true
 - "light background" → background=light
 - "transparent background" or "no background" → background=transparent
@@ -64,6 +81,9 @@ Parse the user's message for preferences. Examples:
 - "export as html" → export=html
 - "copy to clipboard" → export=clipboard
 - "16:9 ratio" → ratio=16:9
+- "bigger characters" or "larger text" → font-size=20
+- "denser" or "more detail" → font-size=8
+- "defaults" or "just do it" → skip options prompt, use all defaults
 
 ## Running the Conversion
 
@@ -86,6 +106,7 @@ Use the venv Python to run the converter:
   [--custom-color "#hex or named color"] \
   [--ratio <original|16:9|4:3|1:1|3:4|9:16>] \
   [--dither-strength <0.0-1.0>] \
+  [--font-size <pixels>] \
   [--filename <custom_name>]
 ```
 
@@ -102,9 +123,9 @@ After conversion:
 After showing the preview, offer:
 
 > "Here's your ASCII art! Want me to:
-> - Export in a different format? (txt, html, svg, png, gif, clipboard)
-> - Try a different style? (classic, braille, block, edge, dot-cross, halftone, retro-art, terminal)
-> - Adjust settings? (wider/narrower, different color, add dithering)
+> - Try a different style or color?
+> - Adjust settings? (ratio, font size, dithering, etc.)
+> - Export in another format? (txt, html, svg, png, gif, clipboard)
 > - Try random mode for a surprise?"
 
 If the user asks for changes, re-run with updated parameters. Remember the previous input path so they don't need to re-specify it.
@@ -120,6 +141,8 @@ If the user asks for changes, re-run with updated parameters. Remember the previ
 **Dither Algorithms**: none, floyd-steinberg, bayer, atkinson
 
 **Aspect Ratios**: original, 16:9, 4:3, 1:1, 3:4, 9:16
+
+**Font Size**: Default 14px. Range 6-30. Bigger = larger characters, smaller = denser art with more detail.
 
 **FIGlet Fonts**: standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed
 
