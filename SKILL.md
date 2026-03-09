@@ -16,7 +16,7 @@ bash {{SKILL_DIR}}/scripts/setup.sh
 ## Input Detection
 
 1. **File path** → check extension: `.jpg/.jpeg/.png/.webp/.bmp/.tiff` → **image**, `.mp4/.webm/.avi/.mov/.mkv` → **video**, `.gif` → check if animated (video) or static (image)
-2. **Pasted/attached image** → save to temp file → **image**
+2. **Pasted/attached image** → save to `ascii/tmp/` folder → **image** (e.g. `ascii/tmp/input.png`)
 3. **Plain text** (no file, or file doesn't exist) → **text** (FIGlet banner)
 4. **Nothing provided** → ask what they want to convert
 
