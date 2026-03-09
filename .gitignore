@@ -24,3 +24,6 @@ Thumbs.db
 *.ascii.txt
 *.ascii.html
 *.ascii.svg
+
+# Test cache
+.pytest_cache/

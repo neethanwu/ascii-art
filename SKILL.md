@@ -48,12 +48,18 @@ Apply these defaults. Only ask the user if they didn't specify and the choice si
 Parse the user's message for preferences. Examples:
 
 - "convert photo.jpg to braille" → style=braille
+- "halftone style" → style=halftone
+- "dot cross look" → style=dot-cross
+- "retro art style" → style=retro-art
 - "make it matrix green" → color=matrix
+- "coral colored" → color=custom, custom_color=coral
+- "sunset vibes" → color=custom, custom_color=#ff6347 (translate creative descriptions to hex)
 - "wider, 120 columns" → cols=120
 - "use doom font" → font=doom
 - "surprise me" or "random" → random mode
 - "invert it" → invert=true
 - "light background" → background=light
+- "transparent background" or "no background" → background=transparent
 - "with dithering" → dither=floyd-steinberg
 - "export as html" → export=html
 - "copy to clipboard" → export=clipboard
@@ -67,17 +73,17 @@ Use the venv Python to run the converter:
 {{SKILL_DIR}}/scripts/.venv/bin/python {{SKILL_DIR}}/scripts/convert.py \
   --input "<input>" \
   --type <text|image|video> \
-  --style <classic|braille|block|edge> \
+  --style <classic|braille|block|edge|dot-cross|halftone|retro-art|terminal> \
   --cols <number> \
   --color <grayscale|full|matrix|amber|custom> \
-  --background <dark|light> \
+  --background <dark|light|transparent> \
   --dither <none|floyd-steinberg|bayer|atkinson> \
   --export <txt|html|svg|png|gif|clipboard> \
   [--invert] \
   [--random] \
   [--font <font_name>] \
   [--fps <number>] \
-  [--custom-color "#hex"] \
+  [--custom-color "#hex or named color"] \
   [--ratio <original|16:9|4:3|1:1|3:4|9:16>] \
   [--dither-strength <0.0-1.0>] \
   [--filename <custom_name>]
@@ -97,7 +103,7 @@ After showing the preview, offer:
 
 > "Here's your ASCII art! Want me to:
 > - Export in a different format? (txt, html, svg, png, gif, clipboard)
-> - Try a different style? (classic, braille, block, edge)
+> - Try a different style? (classic, braille, block, edge, dot-cross, halftone, retro-art, terminal)
 > - Adjust settings? (wider/narrower, different color, add dithering)
 > - Try random mode for a surprise?"
 
@@ -105,9 +111,11 @@ If the user asks for changes, re-run with updated parameters. Remember the previ
 
 ## Valid Options Reference
 
-**Art Styles**: classic, braille, block, edge
+**Art Styles**: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal
 
 **Color Modes**: grayscale, full, matrix, amber, custom
+
+**Custom Colors**: Supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `gold`, `hotpink`, etc.). When users describe colors creatively (e.g., "sunset vibes", "ocean blue", "forest green"), translate to an appropriate hex value and pass it as `--custom-color`.
 
 **Dither Algorithms**: none, floyd-steinberg, bayer, atkinson
 
@@ -117,4 +125,4 @@ If the user asks for changes, re-run with updated parameters. Remember the previ
 
 **Export Formats**: txt, html, svg, png, gif, clipboard
 
-**Background**: dark, light
+**Background**: dark, light, transparent

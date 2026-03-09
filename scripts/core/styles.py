@@ -1,17 +1,32 @@
-"""Art style implementations: classic, braille, block, edge."""
+"""Art style implementations: classic, braille, block, edge, dot-cross, halftone, and themed presets."""
 
 import numpy as np
 
-# Default density ramps (dark → light)
-RAMPS = {
-    "standard": "@%#*+=-:. ",
-    "detailed": "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
-    "simple": "@#S%?*+;:,. ",
-    "minimal": "@#:. ",
-    "blocks": "\u2588\u2593\u2592\u2591 ",
-}
+# Default density ramp (dark → light)
+DEFAULT_RAMP = "@%#*+=-:. "
 
-DEFAULT_RAMP = RAMPS["standard"]
+# Dot Cross ramp: uses dot/cross/star symbols for a different aesthetic
+DOT_CROSS_RAMP = "\u2588\u2593#X*x+:\u00b7 "  # █▓#X*x+:· (space)
+
+# Halftone ramp: simulates varying dot sizes
+HALFTONE_RAMP = "@O0o\u00b7. "  # @O0o·. (space)
+
+# Themed preset definitions
+PRESETS = {
+    "retro-art": {
+        "ramp": "\u2588\u2593\u2592\u2591#%=+:. ",
+        "color": "amber",
+        "dither": "atkinson",
+        "dither_strength": 0.9,
+        "description": "Block characters with amber tint and Atkinson dithering for retro CRT look",
+    },
+    "terminal": {
+        "ramp": "@%#*+=-:. ",
+        "color": "matrix",
+        "dither": "none",
+        "description": "Classic ASCII in green terminal monochrome",
+    },
+}
 
 # Braille dot map: position (row, col) → bit value
 BRAILLE_DOT_MAP = [
@@ -36,20 +51,12 @@ def classic_ascii(brightness: np.ndarray, ramp: str = DEFAULT_RAMP) -> list[list
     brightness: (rows, cols) float array 0-255
     Returns: 2D list of characters
     """
-    rows, cols = brightness.shape
     ramp_len = len(ramp)
-    # Normalize to ramp indices
+    ramp_arr = np.array(list(ramp))
     indices = np.clip(brightness / 255.0, 0, 1)
     indices = (indices * (ramp_len - 1)).astype(int)
     indices = np.clip(indices, 0, ramp_len - 1)
-
-    result = []
-    for r in range(rows):
-        row = []
-        for c in range(cols):
-            row.append(ramp[indices[r, c]])
-        result.append(row)
-    return result
+    return ramp_arr[indices].tolist()
 
 
 def braille_style(brightness_hi: np.ndarray, threshold: float = 128.0) -> list[list[str]]:
@@ -87,19 +94,11 @@ def block_style(brightness: np.ndarray) -> list[list[str]]:
     5 levels of fill.
     """
     blocks = "\u2588\u2593\u2592\u2591 "
-    rows, cols = brightness.shape
-    # Invert: dark pixels → full block, light → space
+    blocks_arr = np.array(list(blocks))
     indices = np.clip((255.0 - brightness) / 255.0, 0, 1)
     indices = (indices * (len(blocks) - 1)).astype(int)
     indices = np.clip(indices, 0, len(blocks) - 1)
-
-    result = []
-    for r in range(rows):
-        row = []
-        for c in range(cols):
-            row.append(blocks[indices[r, c]])
-        result.append(row)
-    return result
+    return blocks_arr[indices].tolist()
 
 
 def edge_style(
@@ -125,8 +124,6 @@ def edge_style(
 
             # Normalize angle to 0-180 degrees
             deg = np.degrees(direction[r, c]) % 180
-            if deg < 0:
-                deg += 180
 
             if deg < 22.5 or deg >= 157.5:
                 row.append(EDGE_CHARS["horizontal"])
@@ -138,3 +135,19 @@ def edge_style(
                 row.append(EDGE_CHARS["diagonal_down"])
         result.append(row)
     return result
+
+
+def dot_cross_style(brightness: np.ndarray) -> list[list[str]]:
+    """
+    Map brightness using dot/cross symbols for a graphic, stippled look.
+    Uses: █▓#X*x+:· (space)
+    """
+    return classic_ascii(brightness, ramp=DOT_CROSS_RAMP)
+
+
+def halftone_style(brightness: np.ndarray) -> list[list[str]]:
+    """
+    Simulate print halftone with varying-size dot characters.
+    Uses: @O0o·. (space) — large dots for dark, small for light.
+    """
+    return classic_ascii(brightness, ramp=HALFTONE_RAMP)

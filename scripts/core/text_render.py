@@ -38,8 +38,3 @@ def render_text(text: str, font: str = "standard") -> str:
         result = pyfiglet.figlet_format(text, font="standard")
 
     return result.rstrip("\n")
-
-
-def list_fonts() -> list[str]:
-    """Return list of available font names."""
-    return AVAILABLE_FONTS.copy()

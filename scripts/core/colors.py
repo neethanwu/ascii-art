@@ -4,11 +4,31 @@ import numpy as np
 from typing import Optional
 
 
+# CSS named colors (subset of most common ones)
+NAMED_COLORS = {
+    "red": "#ff0000", "green": "#008000", "blue": "#0000ff",
+    "yellow": "#ffff00", "cyan": "#00ffff", "magenta": "#ff00ff",
+    "orange": "#ffa500", "purple": "#800080", "pink": "#ffc0cb",
+    "lime": "#00ff00", "teal": "#008080", "navy": "#000080",
+    "maroon": "#800000", "olive": "#808000", "coral": "#ff7f50",
+    "salmon": "#fa8072", "gold": "#ffd700", "indigo": "#4b0082",
+    "violet": "#ee82ee", "crimson": "#dc143c", "turquoise": "#40e0d0",
+    "tomato": "#ff6347", "chocolate": "#d2691e", "firebrick": "#b22222",
+    "dodgerblue": "#1e90ff", "limegreen": "#32cd32", "hotpink": "#ff69b4",
+    "skyblue": "#87ceeb", "springgreen": "#00ff7f", "white": "#ffffff",
+    "silver": "#c0c0c0", "gray": "#808080", "grey": "#808080",
+}
+
+
 def parse_hex_color(hex_str: str) -> tuple[int, int, int]:
-    """Parse hex color string like '#ff6600' or 'ff6600'."""
+    """Parse hex color string like '#ff6600', 'ff6600', or named color like 'coral'."""
+    # Check if it's a named color
+    name = hex_str.lower().strip().lstrip("#")
+    if name in NAMED_COLORS:
+        hex_str = NAMED_COLORS[name]
     hex_str = hex_str.lstrip("#")
     if len(hex_str) != 6:
-        raise ValueError(f"Invalid hex color: #{hex_str}")
+        raise ValueError(f"Invalid color: '{hex_str}'. Use hex (#ff6600) or a named color (coral, red, skyblue, etc.)")
     return (
         int(hex_str[0:2], 16),
         int(hex_str[2:4], 16),

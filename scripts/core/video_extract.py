@@ -98,25 +98,3 @@ def extract_frames(
 
     cap.release()
     print(f"  Extracted {yielded} frames total.", file=sys.stderr)
-
-
-def get_video_info(video_path: str) -> dict:
-    """Get basic video metadata."""
-    try:
-        import cv2
-    except ImportError:
-        return {"error": "opencv not installed"}
-
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        return {"error": f"could not open {video_path}"}
-
-    info = {
-        "fps": cap.get(cv2.CAP_PROP_FPS),
-        "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-        "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        "total_frames": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
-    }
-    info["duration"] = info["total_frames"] / info["fps"] if info["fps"] > 0 else 0
-    cap.release()
-    return info

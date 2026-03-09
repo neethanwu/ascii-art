@@ -1,5 +1,6 @@
 """Export ASCII art to various formats: txt, html, svg, png, gif, clipboard."""
 
+import html as html_module
 import os
 import re
 import sys
@@ -8,6 +9,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from xml.sax.saxutils import escape as xml_escape
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -24,6 +26,7 @@ def sanitize_filename(name: str) -> str:
 def make_output_path(input_name: str, ext: str, filename: Optional[str] = None) -> str:
     """Generate timestamped output filename in CWD."""
     if filename:
+        filename = os.path.basename(filename)  # Strip directory components
         if not filename.endswith(f".{ext}"):
             filename = f"{filename}.{ext}"
         return filename
@@ -50,7 +53,12 @@ def export_html(
     filename: Optional[str] = None,
 ) -> str:
     """Export as self-contained HTML with colored characters."""
-    bg_color = "#000000" if background == "dark" else "#ffffff"
+    if background == "transparent":
+        bg_color = "transparent"
+    elif background == "dark":
+        bg_color = "#000000"
+    else:
+        bg_color = "#ffffff"
 
     lines = []
     rows = len(chars)
@@ -62,15 +70,7 @@ def export_html(
             if ch == " ":
                 line_parts.append(" ")
                 continue
-            # HTML-escape
-            if ch == "&":
-                ch = "&amp;"
-            elif ch == "<":
-                ch = "&lt;"
-            elif ch == ">":
-                ch = "&gt;"
-            elif ch == '"':
-                ch = "&quot;"
+            ch = html_module.escape(ch)
 
             cr, cg, cb = int(colors[r, c, 0]), int(colors[r, c, 1]), int(colors[r, c, 2])
             line_parts.append(f'<span style="color:rgb({cr},{cg},{cb})">{ch}</span>')
@@ -107,6 +107,7 @@ def export_svg(
     chars: list[list[str]],
     colors: np.ndarray,
     input_name: str,
+    background: str = "dark",
     font_size: int = 8,
     filename: Optional[str] = None,
 ) -> str:
@@ -122,9 +123,13 @@ def export_svg(
     lines = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_w:.0f} {svg_h:.0f}" '
         f'width="{svg_w:.0f}" height="{svg_h:.0f}">',
-        f'<rect width="100%" height="100%" fill="#000"/>',
-        f'<text font-family="Courier New, Consolas, monospace" font-size="{font_size}px">',
     ]
+    if background != "transparent":
+        bg_fill = "#000" if background == "dark" else "#fff"
+        lines.append(f'<rect width="100%" height="100%" fill="{bg_fill}"/>')
+    lines.append(
+        f'<text font-family="Courier New, Consolas, monospace" font-size="{font_size}px">'
+    )
 
     for r in range(rows):
         y = (r + 1) * char_h
@@ -133,15 +138,7 @@ def export_svg(
             ch = chars[r][c]
             if ch == " ":
                 continue
-            # XML-escape
-            if ch == "&":
-                ch = "&amp;"
-            elif ch == "<":
-                ch = "&lt;"
-            elif ch == ">":
-                ch = "&gt;"
-            elif ch == '"':
-                ch = "&quot;"
+            ch = xml_escape(ch)
 
             x = c * char_w
             cr, cg, cb = int(colors[r, c, 0]), int(colors[r, c, 1]), int(colors[r, c, 2])
@@ -199,8 +196,12 @@ def export_png(
     img_w = cols * char_w + 20  # padding
     img_h = rows * line_h + 20
 
-    bg_color = (0, 0, 0) if background == "dark" else (255, 255, 255)
-    img = Image.new("RGB", (img_w, img_h), bg_color)
+    if background == "transparent":
+        img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
+    elif background == "dark":
+        img = Image.new("RGB", (img_w, img_h), (0, 0, 0))
+    else:
+        img = Image.new("RGB", (img_w, img_h), (255, 255, 255))
     draw = ImageDraw.Draw(img)
 
     for r in range(rows):
@@ -306,9 +307,8 @@ def export_clipboard_image(png_path: str) -> bool:
 
     try:
         if system == "Darwin":
-            script = f'''
-            set the clipboard to (read (POSIX file "{os.path.abspath(png_path)}") as «class PNGf»)
-            '''
+            safe_path = os.path.abspath(png_path).replace('\\', '\\\\').replace('"', '\\"')
+            script = f'set the clipboard to (read (POSIX file "{safe_path}") as «class PNGf»)'
             proc = subprocess.run(
                 ["osascript", "-e", script],
                 capture_output=True, text=True,

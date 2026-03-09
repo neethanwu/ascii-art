@@ -20,19 +20,19 @@ def floyd_steinberg(brightness: np.ndarray, levels: int, strength: float = 0.8) 
     for y in range(rows):
         for x in range(cols):
             old_val = data[y, x]
-            new_val = np.round(old_val / step) * step
-            new_val = np.clip(new_val, 0, 255)
+            new_val = round(old_val / step) * step
+            new_val = max(0.0, min(255.0, new_val))
             data[y, x] = new_val
             error = (old_val - new_val) * strength
 
             if x + 1 < cols:
-                data[y, x + 1] += error * 7 / 16
+                data[y, x + 1] = max(0.0, min(255.0, data[y, x + 1] + error * 7 / 16))
             if y + 1 < rows:
                 if x - 1 >= 0:
-                    data[y + 1, x - 1] += error * 3 / 16
-                data[y + 1, x] += error * 5 / 16
+                    data[y + 1, x - 1] = max(0.0, min(255.0, data[y + 1, x - 1] + error * 3 / 16))
+                data[y + 1, x] = max(0.0, min(255.0, data[y + 1, x] + error * 5 / 16))
                 if x + 1 < cols:
-                    data[y + 1, x + 1] += error * 1 / 16
+                    data[y + 1, x + 1] = max(0.0, min(255.0, data[y + 1, x + 1] + error * 1 / 16))
 
     return np.clip(data, 0, 255)
 
@@ -79,24 +79,24 @@ def atkinson(brightness: np.ndarray, levels: int, strength: float = 0.8) -> np.n
     for y in range(rows):
         for x in range(cols):
             old_val = data[y, x]
-            new_val = np.round(old_val / step) * step
-            new_val = np.clip(new_val, 0, 255)
+            new_val = round(old_val / step) * step
+            new_val = max(0.0, min(255.0, new_val))
             data[y, x] = new_val
             error = (old_val - new_val) * strength / 8  # Each neighbor gets 1/8
 
             # 6 neighbors (only 6/8 = 75% of error distributed)
             if x + 1 < cols:
-                data[y, x + 1] += error
+                data[y, x + 1] = max(0.0, min(255.0, data[y, x + 1] + error))
             if x + 2 < cols:
-                data[y, x + 2] += error
+                data[y, x + 2] = max(0.0, min(255.0, data[y, x + 2] + error))
             if y + 1 < rows:
                 if x - 1 >= 0:
-                    data[y + 1, x - 1] += error
-                data[y + 1, x] += error
+                    data[y + 1, x - 1] = max(0.0, min(255.0, data[y + 1, x - 1] + error))
+                data[y + 1, x] = max(0.0, min(255.0, data[y + 1, x] + error))
                 if x + 1 < cols:
-                    data[y + 1, x + 1] += error
+                    data[y + 1, x + 1] = max(0.0, min(255.0, data[y + 1, x + 1] + error))
             if y + 2 < rows:
-                data[y + 2, x] += error
+                data[y + 2, x] = max(0.0, min(255.0, data[y + 2, x] + error))
 
     return np.clip(data, 0, 255)
 
