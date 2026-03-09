@@ -309,8 +309,10 @@ def convert_text(args) -> None:
         path = export_md(chars, input_name, filename=args.filename)
         print(f"Exported: {path}")
     else:
-        # Default: print to stdout
+        # Default: print to stdout and auto-copy to clipboard
         print(result)
+        if export_clipboard_text(chars):
+            print("(Copied to clipboard)")
 
 
 def _do_export(args, chars, colors, input_name):
