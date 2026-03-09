@@ -34,7 +34,7 @@ After detecting input, parse the user's message for any pre-specified options (s
 
 ### AskUserQuestion format
 
-Use `questions` array (max 4 per call, 2-4 options per question). If >4 unresolved questions, split into multiple calls. List ALL available choices with numbers in the `question` text; put the top 3 picks as selectable options with an "Other" option for the rest.
+Use `questions` array (max 4 per call, 3 options per question). If >4 unresolved questions, split into multiple calls. List ALL available choices with numbers in the `question` text. Show the top 3 as selectable options — the user can also type a number or name in the free-text field for any other choice.
 
 Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Font → Color → Export → Background.
 
@@ -42,19 +42,18 @@ Example question for Style:
 
 ```json
 {
-  "question": "What art style? 1.Classic 2.Braille 3.Block 4.Edge 5.Dot-cross 6.Halftone 7.Retro-art 8.Terminal",
+  "question": "Art style? 1.Classic 2.Braille 3.Block 4.Edge 5.Dot-cross 6.Halftone 7.Retro-art 8.Terminal",
   "header": "Style",
   "options": [
-    { "label": "1. Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
-    { "label": "2. Braille", "description": "Unicode braille dots — high detail, smooth" },
-    { "label": "3. Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
-    { "label": "Other", "description": "Type a number or name for: 4.Edge 5.Dot-cross 6.Halftone 7.Retro-art 8.Terminal" }
+    { "label": "1. Classic", "description": "Traditional ASCII density ramp" },
+    { "label": "2. Braille", "description": "Unicode braille dots — high detail" },
+    { "label": "3. Block", "description": "Unicode block elements (█▓▒░)" }
   ],
   "multiSelect": false
 }
 ```
 
-Follow the same pattern for other options. The numbered list in the question text must match the order of selectable options — put the default as option 1, and ensure "Other" references the remaining numbers. When user selects "Other", map their typed number or name to the correct value.
+Do NOT include an "Other" option — the SDK always shows a free-text input where users can type a number or name for unlisted choices. Keep option descriptions short. Put the default as option 1.
 
 ### Available options by type
 
@@ -80,7 +79,6 @@ Follow the same pattern for other options. The numbered list in the question tex
 | Export | terminal (stdout), txt, md, png, html, svg, clipboard | terminal |
 
 Note: Style (block, braille, etc.) only applies to image/video. Font only applies to text. "block" as a font and "block" as a style are different things — the agent should pick based on input type. For block-like text art, use `--font ansi_shadow` or `--font block`.
-
 
 Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `gold`). Translate creative descriptions ("sunset vibes") to hex.
 
