@@ -1,6 +1,6 @@
 # ASCII Art Converter
 
-A Claude Code skill that converts text, images, and video to ASCII art.
+An agent skill that converts text, images, and video to ASCII art. Works with any AI coding agent that supports the skill/tool format.
 
 ## Features
 
@@ -16,27 +16,24 @@ A Claude Code skill that converts text, images, and video to ASCII art.
 
 ## Install
 
-```bash
-# Add as a Claude Code skill
-claude skill add https://github.com/yourname/ascii-gen
-```
-
-Or clone manually:
+Clone the repo into your agent's skill directory:
 
 ```bash
 git clone https://github.com/yourname/ascii-gen ~/.claude/skills/ascii-gen
 ```
 
+The skill is defined in `SKILL.md` — any agent that reads skill files can use it.
+
 ## Usage
 
-Trigger with `/ascii` in Claude Code:
+Trigger with `/ascii-art` in your agent:
 
 ```
-/ascii convert photo.jpg to braille
-/ascii "Hello World" in doom font
-/ascii video.mp4 in block style with matrix color
-/ascii photo.png with transparent background
-/ascii surprise me with photo.jpg
+/ascii-art convert photo.jpg to braille
+/ascii-art "Hello World" in doom font
+/ascii-art video.mp4 in block style with matrix color
+/ascii-art photo.png with transparent background
+/ascii-art surprise me with photo.jpg
 ```
 
 The skill parses natural language — no need to remember flags. Just describe what you want.

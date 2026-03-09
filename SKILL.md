@@ -1,5 +1,5 @@
 ---
-name: ascii
+name: ascii-art
 description: Convert text, images, or video to ASCII art. Supports multiple art styles (classic, braille, block, edge), color modes, dithering, and export formats.
 ---
 
