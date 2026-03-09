@@ -29,166 +29,172 @@ Determine what the user wants to convert:
 
 ## Options Prompt
 
-After detecting the input, **always ask the user to configure their options** using a single `AskUserQuestion` call with a `questions` array. Each question becomes a tab the user can fill out. Use type-specific questions.
+After detecting the input and parsing the user's message for pre-specified options, prompt the user for any **remaining** options using `AskUserQuestion`.
 
-**AskUserQuestion constraints**: 1-4 questions per call, 2-4 options per question. Use "Other" option for free-text input where the choices exceed 4.
+**AskUserQuestion constraints**: 1-4 questions per call, 2-4 options per question.
 
-### For image input (4 questions):
+### Strategy
 
+1. **Parse first** — extract any options the user already specified via natural language (see Natural Language Parsing section)
+2. **Build question list** — only include questions for options NOT already specified
+3. **Skip if resolved** — if everything is specified, or user said "defaults" / "just do it", skip prompting entirely. If user said "random" / "surprise me", skip and use `--random`.
+4. **Batch into calls** — if ≤4 questions remain, use one `AskUserQuestion` call. If >4, split across multiple calls (ask the most impactful ones first: style, color, export).
+
+### Question Templates
+
+Pick from these templates based on input type. Only include questions for unresolved options.
+
+**Style** (image/video only):
 ```json
 {
-  "questions": [
-    {
-      "question": "What art style do you want?",
-      "header": "Style",
-      "options": [
-        { "label": "Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
-        { "label": "Braille", "description": "Unicode braille dots — high detail, smooth look" },
-        { "label": "Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
-        { "label": "Other", "description": "Type: edge, dot-cross, halftone, retro-art, or terminal" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What color mode?",
-      "header": "Color",
-      "options": [
-        { "label": "Grayscale", "description": "White on dark — clean, classic look" },
-        { "label": "Full color", "description": "Preserve original image colors" },
-        { "label": "Matrix", "description": "Green on black — hacker terminal vibes" },
-        { "label": "Other", "description": "Type: amber, or custom color (e.g. coral, #ff6600)" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What aspect ratio?",
-      "header": "Ratio",
-      "options": [
-        { "label": "Original", "description": "Keep the image's original proportions" },
-        { "label": "16:9", "description": "Widescreen crop" },
-        { "label": "1:1", "description": "Square crop" },
-        { "label": "Other", "description": "Type: 4:3, 3:4, or 9:16" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What export format?",
-      "header": "Export",
-      "options": [
-        { "label": "PNG", "description": "Image file — best for sharing (default)" },
-        { "label": "HTML", "description": "Colored text in a web page" },
-        { "label": "SVG", "description": "Scalable vector — crisp at any size" },
-        { "label": "Other", "description": "Type: txt, clipboard" }
-      ],
-      "multiSelect": false
-    }
-  ]
+  "question": "What art style? All options: 1.classic 2.braille 3.block 4.edge 5.dot-cross 6.halftone 7.retro-art 8.terminal",
+  "header": "Style",
+  "options": [
+    { "label": "Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
+    { "label": "Braille", "description": "Unicode braille dots — high detail, smooth" },
+    { "label": "Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
+    { "label": "Other", "description": "Type a number or name: 4.edge 5.dot-cross 6.halftone 7.retro-art 8.terminal" }
+  ],
+  "multiSelect": false
 }
 ```
 
-### For text input (3 questions):
-
+**Color** (all types):
 ```json
 {
-  "questions": [
-    {
-      "question": "What font style for your banner?",
-      "header": "Font",
-      "options": [
-        { "label": "Standard", "description": "Clean, readable default font" },
-        { "label": "Doom", "description": "Bold, dramatic block letters" },
-        { "label": "Slant", "description": "Italic-style angled text" },
-        { "label": "Other", "description": "Type: banner, big, small, block, lean, mini, script, shadow, speed" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What color mode?",
-      "header": "Color",
-      "options": [
-        { "label": "Grayscale", "description": "White on dark — classic terminal look" },
-        { "label": "Matrix", "description": "Green on black — hacker vibes" },
-        { "label": "Amber", "description": "Warm orange on dark — retro monitor" },
-        { "label": "Other", "description": "Type: full, or custom color (e.g. coral, #ff6600)" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What export format?",
-      "header": "Export",
-      "options": [
-        { "label": "Terminal", "description": "Print directly to stdout (default)" },
-        { "label": "TXT", "description": "Save as plain text file" },
-        { "label": "PNG", "description": "Render as image file" },
-        { "label": "Other", "description": "Type: html, svg, clipboard" }
-      ],
-      "multiSelect": false
-    }
-  ]
+  "question": "What color mode? All options: 1.grayscale 2.full 3.matrix 4.amber 5.custom",
+  "header": "Color",
+  "options": [
+    { "label": "Grayscale", "description": "White on dark — clean, classic look" },
+    { "label": "Full color", "description": "Preserve original colors from source" },
+    { "label": "Matrix", "description": "Green on black — hacker terminal vibes" },
+    { "label": "Other", "description": "Type: 4.amber, or 5.custom with a color name/hex (e.g. coral, #ff6600)" }
+  ],
+  "multiSelect": false
 }
 ```
 
-### For video input (4 questions):
-
+**Ratio** (image/video only):
 ```json
 {
-  "questions": [
-    {
-      "question": "What art style do you want?",
-      "header": "Style",
-      "options": [
-        { "label": "Classic", "description": "Traditional ASCII density ramp" },
-        { "label": "Braille", "description": "Unicode braille dots — high detail" },
-        { "label": "Block", "description": "Unicode block elements — bold, chunky" },
-        { "label": "Other", "description": "Type: edge, dot-cross, halftone, retro-art, or terminal" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What color mode?",
-      "header": "Color",
-      "options": [
-        { "label": "Grayscale", "description": "White on dark — clean, classic look" },
-        { "label": "Full color", "description": "Preserve original video colors" },
-        { "label": "Matrix", "description": "Green on black — hacker terminal vibes" },
-        { "label": "Other", "description": "Type: amber, or custom color" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What aspect ratio?",
-      "header": "Ratio",
-      "options": [
-        { "label": "Original", "description": "Keep the video's original proportions" },
-        { "label": "16:9", "description": "Widescreen crop" },
-        { "label": "1:1", "description": "Square crop" },
-        { "label": "Other", "description": "Type: 4:3, 3:4, or 9:16" }
-      ],
-      "multiSelect": false
-    },
-    {
-      "question": "What export format?",
-      "header": "Export",
-      "options": [
-        { "label": "GIF", "description": "Animated ASCII art (default)" },
-        { "label": "PNG", "description": "First frame as image" },
-        { "label": "HTML", "description": "First frame as colored web page" },
-        { "label": "Other", "description": "Type: svg, txt" }
-      ],
-      "multiSelect": false
-    }
-  ]
+  "question": "What aspect ratio? All options: 1.original 2.16:9 3.4:3 4.1:1 5.3:4 6.9:16",
+  "header": "Ratio",
+  "options": [
+    { "label": "Original", "description": "Keep the original proportions" },
+    { "label": "16:9", "description": "Widescreen crop (landscape)" },
+    { "label": "1:1", "description": "Square center crop" },
+    { "label": "Other", "description": "Type a number or name: 3.4:3 5.3:4 6.9:16" }
+  ],
+  "multiSelect": false
 }
 ```
 
-### Rules
+**Background** (all types):
+```json
+{
+  "question": "What background?",
+  "header": "Background",
+  "options": [
+    { "label": "Dark", "description": "Black background — default, works best for most styles" },
+    { "label": "Light", "description": "White background — good for printing or light UIs" },
+    { "label": "Transparent", "description": "No background — for overlaying on other content" }
+  ],
+  "multiSelect": false
+}
+```
 
-- If the user already specified an option in their message (via natural language parsing), pre-select it and skip that question
-- If all options are already specified or user says "defaults" / "just do it", skip the prompt entirely
-- If user says "random" or "surprise me", skip the prompt and use `--random` flag
-- When user selects "Other", use their typed text to determine the value
-- For options not covered by questions (dither, font-size, invert), use defaults. The user can request these in follow-up.
-- Map selected labels to CLI flags: "Classic" → `--style classic`, "Full color" → `--color full`, "Terminal" → no `--export` flag (stdout), etc.
+**Export — image**:
+```json
+{
+  "question": "What export format? All options: 1.png 2.html 3.svg 4.txt 5.clipboard",
+  "header": "Export",
+  "options": [
+    { "label": "PNG", "description": "Image file — best for sharing (default)" },
+    { "label": "HTML", "description": "Colored characters in a web page" },
+    { "label": "SVG", "description": "Scalable vector — crisp at any size" },
+    { "label": "Other", "description": "Type: 4.txt (plain text) or 5.clipboard (copy to clipboard)" }
+  ],
+  "multiSelect": false
+}
+```
+
+**Export — text**:
+```json
+{
+  "question": "What export format? All options: 1.terminal 2.txt 3.png 4.html 5.svg 6.clipboard",
+  "header": "Export",
+  "options": [
+    { "label": "Terminal", "description": "Print to stdout — instant preview (default)" },
+    { "label": "TXT", "description": "Save as plain text file" },
+    { "label": "PNG", "description": "Render as image file" },
+    { "label": "Other", "description": "Type: 4.html 5.svg 6.clipboard" }
+  ],
+  "multiSelect": false
+}
+```
+
+**Export — video**:
+```json
+{
+  "question": "What export format? All options: 1.gif 2.png 3.html 4.svg 5.txt",
+  "header": "Export",
+  "options": [
+    { "label": "GIF", "description": "Animated ASCII art (default)" },
+    { "label": "PNG", "description": "First frame as static image" },
+    { "label": "HTML", "description": "First frame as colored web page" },
+    { "label": "Other", "description": "Type: 4.svg 5.txt" }
+  ],
+  "multiSelect": false
+}
+```
+
+**Font** (text only):
+```json
+{
+  "question": "What font? All options: 1.standard 2.doom 3.banner 4.slant 5.big 6.small 7.block 8.lean 9.mini 10.script 11.shadow 12.speed",
+  "header": "Font",
+  "options": [
+    { "label": "Standard", "description": "Clean, readable default font" },
+    { "label": "Doom", "description": "Bold, dramatic block letters" },
+    { "label": "Slant", "description": "Italic-style angled text" },
+    { "label": "Other", "description": "Type a number or name: 3.banner 4-12 see question above" }
+  ],
+  "multiSelect": false
+}
+```
+
+**Dither** (image/video only):
+```json
+{
+  "question": "What dithering? Adds texture/grain to the output.",
+  "header": "Dither",
+  "options": [
+    { "label": "None", "description": "No dithering — clean output (default)" },
+    { "label": "Floyd-Steinberg", "description": "Error diffusion — natural, organic texture" },
+    { "label": "Bayer", "description": "Ordered pattern — retro, grid-like texture" },
+    { "label": "Atkinson", "description": "Classic Mac dithering — high contrast, sharp" }
+  ],
+  "multiSelect": false
+}
+```
+
+### Priority Order
+
+When building the question list, prioritize in this order (most impactful first):
+
+**Image/video**: Style → Color → Export → Ratio → Background → Dither
+**Text**: Font → Color → Export → Background
+
+If >4 questions remain after filtering out pre-specified options, split into two calls:
+- **Call 1**: first 4 questions (highest priority)
+- **Call 2**: remaining questions
+
+### Handling "Other" Responses
+
+When the user selects "Other" and types free text:
+- If they type a number (e.g. "4"), map it to the numbered option in the question text
+- If they type a name (e.g. "edge", "amber"), use it directly
+- If they type a custom color (e.g. "coral", "#ff6600"), set `--color custom --custom-color <value>`
 
 ## Natural Language Parsing
 
