@@ -24,6 +24,7 @@ from core.styles import (
     edge_style,
     dot_cross_style,
     halftone_style,
+    particles_style,
     DEFAULT_RAMP,
     PRESETS,
 )
@@ -49,7 +50,7 @@ VIDEO_EXTS = {".mp4", ".webm", ".avi", ".mov", ".mkv"}
 
 ALL_STYLES = [
     "classic", "braille", "block", "edge",
-    "dot-cross", "halftone",
+    "dot-cross", "halftone", "particles",
     "retro-art", "terminal",
 ]
 
@@ -67,6 +68,8 @@ RANDOM_COMBOS = [
     {"style": "edge", "color": "matrix", "dither": "none"},
     {"style": "dot-cross", "color": "original", "dither": "bayer"},
     {"style": "halftone", "color": "grayscale", "dither": "floyd-steinberg"},
+    {"style": "particles", "color": "original", "dither": "none"},
+    {"style": "particles", "color": "matrix", "dither": "none"},
     {"style": "retro-art", "color": "amber", "dither": "atkinson"},
     {"style": "terminal", "color": "matrix", "dither": "none"},
 ]
@@ -176,6 +179,15 @@ def _convert_with_style(args, img):
         grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
         dithered = apply_dither(grid.brightness, args.dither, levels=7, strength=args.dither_strength)
         chars = halftone_style(dithered)
+        colors = apply_color(
+            grid.brightness, grid.colors,
+            mode=args.color, background=args.background,
+            custom_color=args.custom_color,
+        )
+
+    elif args.style == "particles":
+        grid = process_image(img, cols=args.cols, ratio=args.ratio, invert=args.invert, char_aspect=char_aspect, char_pixel_width=char_pixel_width)
+        chars = particles_style(grid.brightness)
         colors = apply_color(
             grid.brightness, grid.colors,
             mode=args.color, background=args.background,

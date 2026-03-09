@@ -1,6 +1,7 @@
-"""Art style implementations: classic, braille, block, edge, dot-cross, halftone, and themed presets."""
+"""Art style implementations: classic, braille, block, edge, dot-cross, halftone, particles, and themed presets."""
 
 import numpy as np
+from numpy.random import default_rng
 
 # Default density ramp (dark → light, 70 chars — Paulbourke standard)
 DEFAULT_RAMP = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`. "
@@ -10,6 +11,9 @@ DOT_CROSS_RAMP = "\u2588\u2593#X*x+:\u00b7 "  # █▓#X*x+:· (space)
 
 # Halftone ramp: simulates varying dot sizes
 HALFTONE_RAMP = "@O0o\u00b7. "  # @O0o·. (space)
+
+# Particles chars: small symbols scattered by brightness
+PARTICLE_CHARS = ["\u2022", "\u00b7", "\u2027", "*", "\u2219", "+"]  # •·‧*∙+
 
 # Themed preset definitions
 PRESETS = {
@@ -151,3 +155,33 @@ def halftone_style(brightness: np.ndarray) -> list[list[str]]:
     Uses: @O0o·. (space) — large dots for dark, small for light.
     """
     return classic_ascii(brightness, ramp=HALFTONE_RAMP)
+
+
+def particles_style(brightness: np.ndarray, seed: int = 42) -> list[list[str]]:
+    """
+    Sparse scattered dots — darker pixels have higher chance of placing a particle.
+    Lighter areas become empty space, creating an organic dispersed look.
+    """
+    rows, cols = brightness.shape
+    rng = default_rng(seed)
+
+    # Probability of placing a particle: dark=high, light=low
+    # Invert and normalize: 0 (white) → 0% chance, 255 (black) → 90% chance
+    prob = (255.0 - brightness) / 255.0 * 0.9
+
+    # Random roll per cell
+    rolls = rng.random((rows, cols))
+
+    result = []
+    for r in range(rows):
+        row = []
+        for c in range(cols):
+            if rolls[r, c] < prob[r, c]:
+                # Pick char based on brightness: darker = bigger particle
+                dark = (255.0 - brightness[r, c]) / 255.0
+                idx = min(int(dark * len(PARTICLE_CHARS)), len(PARTICLE_CHARS) - 1)
+                row.append(PARTICLE_CHARS[idx])
+            else:
+                row.append(" ")
+        result.append(row)
+    return result

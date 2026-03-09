@@ -30,13 +30,17 @@ Parse the user's message for pre-specified options. Then prompt for **unspecifie
 
 Use `questions` array (max 4 per call, 3 options per question). List ALL choices with numbers in the `question` text. Top 3 as selectable options — user can type any number/name in free-text. No "Other" option. Default as option 1.
 
-Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither → (Mouse Mode → Animation, if interactive/tsx). **Text**: Font → Color → Export → Background.
+**Image/video** — ask in two rounds:
+1. **Round 1** (4 questions): Style → Color → Export → Background
+2. **Round 2** (only if export is `interactive` or `tsx`): Mouse Mode → Animation
+
+**Text**: Font → Color → Export → Background (single round).
 
 ### Image/video options
 
 | Option | Choices | Default |
 |--------|---------|---------|
-| Style | classic, braille, block, edge, dot-cross, halftone, retro-art, terminal | classic |
+| Style | classic, braille, block, edge, dot-cross, halftone, particles, retro-art, terminal | classic |
 | Color | grayscale, original, matrix, amber, custom (hex/named) | grayscale |
 | Ratio | original, 16:9, 4:3, 1:1, 3:4, 9:16 | original |
 | Background | dark, light, transparent | dark |

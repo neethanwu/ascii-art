@@ -4,7 +4,7 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 
 ## Features
 
-- **8 art styles**: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal
+- **9 art styles**: classic, braille, block, edge, dot-cross, halftone, particles, retro-art, terminal
 - **5 color modes**: grayscale, original (full RGB), matrix green, amber, custom (hex or named colors)
 - **3 dithering algorithms**: Floyd-Steinberg, Bayer, Atkinson
 - **9 export formats**: txt, md, html, svg, png, gif, clipboard, interactive (HTML+JS), tsx (React component)
@@ -60,7 +60,7 @@ The skill parses natural language and presents all options interactively — jus
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| Style | classic | Art style for images/video: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal |
+| Style | classic | Art style for images/video: classic, braille, block, edge, dot-cross, halftone, particles, retro-art, terminal |
 | Font | standard | FIGlet font for text: standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed, ansi_shadow, ansi_regular |
 | Color | grayscale | Color mode: grayscale, original, matrix, amber, custom |
 | Background | dark | Background: dark, light, transparent |
@@ -95,6 +95,7 @@ The conversion pipeline:
 | edge | Sobel edge detection with directional characters |
 | dot-cross | Dot/cross/star symbols for a stippled look |
 | halftone | Varying-size dot characters simulating print halftone |
+| particles | Sparse scattered dots — darker areas denser, lighter areas empty |
 | retro-art | Block chars + amber color + Atkinson dithering (preset) |
 | terminal | Classic ASCII + matrix green (preset) |
 
