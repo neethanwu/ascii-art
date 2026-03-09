@@ -36,7 +36,7 @@ After detecting input, parse the user's message for any pre-specified options (s
 
 Use `questions` array (max 4 per call, 3 options per question). If >4 unresolved questions, split into multiple calls. List ALL available choices with numbers in the `question` text. Show the top 3 as selectable options — the user can also type a number or name in the free-text field for any other choice.
 
-Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Font → Color → Export → Background.
+Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither → (Mouse Mode → Animation, if interactive/tsx). **Text**: Font → Color → Export → Background.
 
 Example question for Style:
 
@@ -67,7 +67,9 @@ Do NOT include an "Other" option — the SDK always shows a free-text input wher
 | Background | dark, light, transparent | dark |
 | Dither | none, floyd-steinberg, bayer, atkinson | none |
 | Font size | 6-30 px | 14 |
-| Export | png, html, svg, txt, md, clipboard (image default: png, video default: gif) | auto |
+| Export | png, html, svg, txt, md, clipboard, interactive, tsx (image default: png, video default: gif) | auto |
+| Mouse mode | push, attract (only for interactive/tsx) | push |
+| Animation | none, noise-field, intervals, beam-sweep, glitch, crt (only for interactive/tsx) | none |
 
 **Text options:**
 
@@ -81,6 +83,8 @@ Do NOT include an "Other" option — the SDK always shows a free-text input wher
 Note: Style (block, braille, etc.) only applies to image/video. Font only applies to text. "block" as a font and "block" as a style are different things — the agent should pick based on input type. For block-like text art, use `--font ansi_shadow` or `--font block`.
 
 Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `gold`). Translate creative descriptions ("sunset vibes") to hex.
+
+Interactive/tsx only applies to image/video input. Text + interactive/tsx → error. Only ask mouse mode and animation when export is `interactive` or `tsx`. Interactive/tsx defaults: max 160 cols, hover-strength 35, area-size 300. Rows are computed from cols + font char_aspect — changing font-size adjusts density proportionally. The `--hover-strength`, `--area-size`, `--spread` flags use defaults — don't ask (advanced tuning).
 
 ## Running the Conversion
 
@@ -102,16 +106,23 @@ Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `go
   [--ratio <ratio>] \
   [--dither-strength <0.0-1.0>] \
   [--font-size <pixels>] \
-  [--filename <custom_name>]
+  [--filename <custom_name>] \
+  [--mouse-mode <push|attract>] \
+  [--hover-strength <0-100>] \
+  [--area-size <pixels>] \
+  [--spread <multiplier>] \
+  [--animation <none|noise-field|intervals|beam-sweep|glitch|crt>]
 ```
 
 ## Output
 
 All exported files are saved to an `ascii/` folder in the current working directory (created automatically).
 
-- **Text**: the script prints to stdout (and auto-copies to clipboard). Show the result in your response inside a markdown code block (triple backticks) to preserve exact spacing. Do NOT paste it as plain text — whitespace will break.
-- **Image**: show file path and use Read tool to display inline if possible.
-- **Video**: first frame PNG + animated GIF. Show file paths.
+- **Text (terminal)**: prints to stdout + auto-copies to clipboard. Show in a code block.
+- **File exports (png, html, svg, txt, md, gif)**: show the file path. Use Read tool to display images inline.
+- **Interactive HTML**: show the file path. Suggest: "Open in browser with `open <path>`"
+- **React TSX**: show the file path. Show a brief usage snippet: `import { AsciiArt } from './<filename>'`
+- **Never preview in terminal** for image/video/interactive exports — it's not useful.
 
 ## Follow-up
 

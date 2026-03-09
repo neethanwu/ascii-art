@@ -7,13 +7,16 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 - **8 art styles**: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal
 - **5 color modes**: grayscale, original (full RGB), matrix green, amber, custom (hex or named colors)
 - **3 dithering algorithms**: Floyd-Steinberg, Bayer, Atkinson
-- **7 export formats**: txt, md, html, svg, png, gif, clipboard
+- **9 export formats**: txt, md, html, svg, png, gif, clipboard, interactive (HTML+JS), tsx (React component)
 - **3 background modes**: dark, light, transparent
 - **Aspect ratio presets**: original, 16:9, 4:3, 1:1, 3:4, 9:16 (center-crop)
 - **Adjustable character size**: `--font-size` controls density in image exports
 - **Auto-sizing**: output matches original image dimensions by default
 - **Text input**: FIGlet banners with 14 font choices (including ansi_shadow for block-style text)
-- **Video input**: frame extraction with animated GIF export
+- **Interactive mode**: canvas-based renderer with spring physics, mouse interaction (push/attract), and 5 animation presets
+- **5 animation presets**: noise-field, intervals, beam-sweep, glitch, crt
+- **React component**: self-contained `.tsx` with embedded data, SSR-safe, zero dependencies
+- **Video input**: frame extraction with animated GIF or interactive export
 - **Random mode**: curated style combinations for surprise results
 
 ## Install
@@ -47,6 +50,8 @@ Trigger with `/ascii-art` in your agent:
 /ascii-art video.mp4 in block style with matrix color
 /ascii-art photo.png with transparent background
 /ascii-art surprise me with photo.jpg
+/ascii-art photo.jpg as interactive with glitch animation
+/ascii-art photo.png as react component with crt effect
 ```
 
 The skill parses natural language and presents all options interactively — just describe what you want, pick your settings, or reply "defaults" to go fast.
@@ -61,9 +66,11 @@ The skill parses natural language and presents all options interactively — jus
 | Background | dark | Background: dark, light, transparent |
 | Ratio | original | Aspect ratio crop: original, 16:9, 4:3, 1:1, 3:4, 9:16 |
 | Font size | 14 | Character size in pixels for image exports (bigger = larger chars, smaller = denser) |
-| Columns | auto | Output width in characters (auto preserves original image size) |
+| Columns | auto (max 160 for interactive/tsx) | Output width in characters (auto preserves original image size) |
 | Dither | none | Dithering: none, floyd-steinberg, bayer, atkinson |
-| Export | auto (text→stdout, image→png, video→gif) | Format: txt, md, html, svg, png, gif, clipboard |
+| Export | auto (text→stdout, image→png, video→gif) | Format: txt, md, html, svg, png, gif, clipboard, interactive, tsx |
+| Mouse mode | push | Mouse interaction for interactive/tsx: push, attract |
+| Animation | none | Animation preset for interactive/tsx: none, noise-field, intervals, beam-sweep, glitch, crt |
 
 ## How It Works
 

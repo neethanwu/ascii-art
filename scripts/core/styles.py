@@ -2,8 +2,8 @@
 
 import numpy as np
 
-# Default density ramp (dark → light)
-DEFAULT_RAMP = "@%#*+=-:. "
+# Default density ramp (dark → light, 70 chars — Paulbourke standard)
+DEFAULT_RAMP = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`. "
 
 # Dot Cross ramp: uses dot/cross/star symbols for a different aesthetic
 DOT_CROSS_RAMP = "\u2588\u2593#X*x+:\u00b7 "  # █▓#X*x+:· (space)
@@ -21,7 +21,7 @@ PRESETS = {
         "description": "Block characters with amber tint and Atkinson dithering for retro CRT look",
     },
     "terminal": {
-        "ramp": "@%#*+=-:. ",
+        "ramp": "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`. ",
         "color": "matrix",
         "dither": "none",
         "description": "Classic ASCII in green terminal monochrome",

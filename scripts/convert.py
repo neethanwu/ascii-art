@@ -41,6 +41,8 @@ from core.exporters import (
     export_md,
     get_font_metrics,
 )
+from core.interactive_exporter import export_interactive_html
+from core.react_exporter import export_react_component
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"}
 VIDEO_EXTS = {".mp4", ".webm", ".avi", ".mov", ".mkv"}
@@ -114,7 +116,7 @@ def _apply_preset(args) -> None:
 
 def _get_font_params(args):
     """Return (char_pixel_width, char_aspect) for pixel exports, (0, None) for text."""
-    if args.export in (None, "png", "gif", "clipboard", "html", "svg"):
+    if args.export in (None, "png", "gif", "clipboard", "html", "svg", "interactive", "tsx"):
         return get_font_metrics(font_size=args.font_size)
     return 0, None  # txt — use terminal defaults
 
@@ -206,6 +208,10 @@ def _convert_with_style(args, img):
 def convert_image(args) -> None:
     """Convert image to ASCII art."""
     img = load_image(args.input)
+    # Capture post-crop aspect ratio for interactive renderer
+    from core.pipeline import crop_to_ratio
+    cropped = crop_to_ratio(img, args.ratio)
+    args._source_aspect = cropped.size[1] / cropped.size[0]  # h/w
     chars, colors = _convert_with_style(args, img)
     input_name = os.path.basename(args.input)
     _do_export(args, chars, colors, input_name)
@@ -225,8 +231,8 @@ def convert_video(args) -> None:
 
     input_name = os.path.basename(args.input)
 
-    # For non-GIF exports, only need first frame
-    if args.export and args.export != "gif":
+    # For non-GIF/non-interactive/non-tsx exports, only need first frame
+    if args.export and args.export not in ("gif", "interactive", "tsx"):
         first_frame = next(extract_frames(args.input, target_fps=args.fps), None)
         if first_frame is None:
             print("Error: No frames extracted from video.", file=sys.stderr)
@@ -247,7 +253,28 @@ def convert_video(args) -> None:
 
     # Default export: PNG preview of first frame + GIF if multiple frames
     fs = args.font_size
-    if args.export is None:
+    source_aspect = getattr(args, '_source_aspect', None)
+    if args.export == "interactive":
+        path = export_interactive_html(
+            frames, input_name,
+            background=args.background, font_size=fs,
+            mouse_mode=args.mouse_mode, hover_strength=args.hover_strength,
+            area_size=args.area_size, spread=args.spread,
+            animation=args.animation, filename=args.filename,
+            source_aspect=source_aspect,
+        )
+        print(f"Exported: {path}")
+    elif args.export == "tsx":
+        path = export_react_component(
+            frames, input_name,
+            background=args.background, font_size=fs,
+            mouse_mode=args.mouse_mode, hover_strength=args.hover_strength,
+            area_size=args.area_size, spread=args.spread,
+            animation=args.animation, filename=args.filename,
+            source_aspect=source_aspect,
+        )
+        print(f"Exported: {path}")
+    elif args.export is None:
         path = export_png(frames[0][0], frames[0][1], input_name,
                          background=args.background, font_size=fs, filename=args.filename)
         print(f"Preview (first frame): {path}")
@@ -276,6 +303,9 @@ def _figlet_to_grid(result: str) -> tuple[list[list[str]], int, int]:
 
 def convert_text(args) -> None:
     """Convert text to ASCII art banner."""
+    if args.export in ("interactive", "tsx"):
+        print("Error: Interactive/React export requires image or video input.", file=sys.stderr)
+        sys.exit(1)
     result = render_text(args.input, font=args.font)
     input_name = args.input[:20].replace(" ", "_")
     chars, rows, cols = _figlet_to_grid(result)
@@ -318,7 +348,28 @@ def convert_text(args) -> None:
 def _do_export(args, chars, colors, input_name):
     """Handle export for image conversion."""
     fs = args.font_size
-    if args.export == "txt":
+    source_aspect = getattr(args, '_source_aspect', None)
+    if args.export == "interactive":
+        path = export_interactive_html(
+            [(chars, colors)], input_name,
+            background=args.background, font_size=fs,
+            mouse_mode=args.mouse_mode, hover_strength=args.hover_strength,
+            area_size=args.area_size, spread=args.spread,
+            animation=args.animation, filename=args.filename,
+            source_aspect=source_aspect,
+        )
+        print(f"Exported: {path}")
+    elif args.export == "tsx":
+        path = export_react_component(
+            [(chars, colors)], input_name,
+            background=args.background, font_size=fs,
+            mouse_mode=args.mouse_mode, hover_strength=args.hover_strength,
+            area_size=args.area_size, spread=args.spread,
+            animation=args.animation, filename=args.filename,
+            source_aspect=source_aspect,
+        )
+        print(f"Exported: {path}")
+    elif args.export == "txt":
         path = export_txt(chars, input_name, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "md":
@@ -395,11 +446,25 @@ def main():
 
     # Export
     parser.add_argument("--export", "-e",
-                        choices=["terminal", "txt", "md", "html", "svg", "png", "gif", "clipboard"],
+                        choices=["terminal", "txt", "md", "html", "svg", "png", "gif",
+                                 "clipboard", "interactive", "tsx"],
                         help="Export format (default: auto)")
     parser.add_argument("--filename", "-o", help="Custom output filename")
     parser.add_argument("--font-size", type=int, default=14,
                         help="Character size in pixels for image exports (default: 14)")
+
+    # Interactive options
+    parser.add_argument("--mouse-mode", choices=["push", "attract"],
+                        default="push", help="Mouse interaction mode (default: push)")
+    parser.add_argument("--hover-strength", type=int, default=35,
+                        help="Mouse hover force 0-100 (default: 35)")
+    parser.add_argument("--area-size", type=int, default=300,
+                        help="Mouse interaction radius in pixels (default: 300)")
+    parser.add_argument("--spread", type=float, default=1.1,
+                        help="Interaction spread multiplier (default: 1.1)")
+    parser.add_argument("--animation",
+                        choices=["none", "noise-field", "intervals", "beam-sweep", "glitch", "crt"],
+                        default="none", help="Animation preset (default: none)")
 
     args = parser.parse_args()
 
@@ -415,6 +480,12 @@ def main():
     # Normalize "terminal" export to None (stdout)
     if args.export == "terminal":
         args.export = None
+
+    # Interactive: cap auto-cols at 200 for canvas performance.
+    # Rows are derived from cols + font-size char_aspect in the pipeline,
+    # so everything stays proportionally linked.
+    if args.export in ("interactive", "tsx") and args.cols == 0:
+        args.cols = 160
 
     # Apply preset overrides (must come after random mode, before routing)
     _apply_preset(args)
