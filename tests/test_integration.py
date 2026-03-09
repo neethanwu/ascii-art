@@ -62,7 +62,7 @@ class TestTextConversion:
              "--filename", "out.txt"], cwd=tmpdir
         )
         assert rc == 0
-        assert os.path.exists(os.path.join(tmpdir, "out.txt"))
+        assert os.path.exists(os.path.join(tmpdir, "ascii", "out.txt"))
 
 
 @pytest.mark.skipif(not os.path.exists(PYTHON), reason="venv not set up")
@@ -77,7 +77,7 @@ class TestImageConversion:
                  "--export", "txt", "--filename", f"{style}.txt"], cwd=tmpdir
             )
             assert rc == 0, f"Style {style} failed: {stderr}"
-            assert os.path.exists(os.path.join(tmpdir, f"{style}.txt"))
+            assert os.path.exists(os.path.join(tmpdir, "ascii", f"{style}.txt"))
 
     def test_all_color_modes(self, tmpdir):
         img_path = _create_test_image(tmpdir)
@@ -103,7 +103,7 @@ class TestImageConversion:
              "--export", "png", "--filename", "trans.png"], cwd=tmpdir
         )
         assert rc == 0
-        img = Image.open(os.path.join(tmpdir, "trans.png"))
+        img = Image.open(os.path.join(tmpdir, "ascii", "trans.png"))
         assert img.mode == "RGBA"
 
     def test_transparent_html(self, tmpdir):
@@ -113,7 +113,7 @@ class TestImageConversion:
              "--export", "html", "--filename", "trans.html"], cwd=tmpdir
         )
         assert rc == 0
-        content = open(os.path.join(tmpdir, "trans.html")).read()
+        content = open(os.path.join(tmpdir, "ascii", "trans.html")).read()
         assert "background: transparent" in content
 
     def test_preset_respects_explicit_override(self, tmpdir):
@@ -142,7 +142,7 @@ class TestImageConversion:
                  "--export", fmt, "--filename", f"out.{fmt}"], cwd=tmpdir
             )
             assert rc == 0, f"Export {fmt} failed: {stderr}"
-            assert os.path.exists(os.path.join(tmpdir, f"out.{fmt}"))
+            assert os.path.exists(os.path.join(tmpdir, "ascii", f"out.{fmt}"))
 
     def test_dithering(self, tmpdir):
         img_path = _create_test_image(tmpdir)

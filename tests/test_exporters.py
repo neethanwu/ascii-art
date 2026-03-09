@@ -39,25 +39,27 @@ class TestSanitizeFilename:
 class TestMakeOutputPath:
     def test_custom_filename(self):
         path = make_output_path("input", "png", filename="custom.png")
-        assert path == "custom.png"
+        assert os.path.basename(path) == "custom.png"
+        assert os.path.join("ascii", "custom.png") in path
 
     def test_custom_filename_adds_extension(self):
         path = make_output_path("input", "png", filename="custom")
-        assert path == "custom.png"
+        assert os.path.basename(path) == "custom.png"
 
     def test_auto_includes_timestamp(self):
         path = make_output_path("photo.jpg", "png")
         assert "photo_ascii_" in path
         assert path.endswith(".png")
+        assert "ascii" in path
 
     def test_path_traversal_blocked(self):
         path = make_output_path("input", "txt", filename="../../etc/evil")
         assert ".." not in path
-        assert path == "evil.txt"
+        assert os.path.basename(path) == "evil.txt"
 
     def test_absolute_path_stripped(self):
         path = make_output_path("input", "txt", filename="/tmp/secret.txt")
-        assert path == "secret.txt"
+        assert os.path.basename(path) == "secret.txt"
 
 
 class TestExportTxt:

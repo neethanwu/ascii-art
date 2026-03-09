@@ -23,17 +23,26 @@ def sanitize_filename(name: str) -> str:
     return name or "output"
 
 
+def _ensure_output_dir() -> str:
+    """Ensure ./ascii/ output directory exists and return its path."""
+    out_dir = os.path.join(os.getcwd(), "ascii")
+    os.makedirs(out_dir, exist_ok=True)
+    return out_dir
+
+
 def make_output_path(input_name: str, ext: str, filename: Optional[str] = None) -> str:
-    """Generate timestamped output filename in CWD."""
+    """Generate timestamped output filename in ./ascii/ directory."""
+    out_dir = _ensure_output_dir()
+
     if filename:
         filename = os.path.basename(filename)  # Strip directory components
         if not filename.endswith(f".{ext}"):
             filename = f"{filename}.{ext}"
-        return filename
+        return os.path.join(out_dir, filename)
 
     safe_name = sanitize_filename(input_name)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{safe_name}_ascii_{timestamp}.{ext}"
+    return os.path.join(out_dir, f"{safe_name}_ascii_{timestamp}.{ext}")
 
 
 def export_txt(chars: list[list[str]], input_name: str, filename: Optional[str] = None) -> str:

@@ -55,7 +55,7 @@ The skill parses natural language and presents all options interactively — jus
 | Font size | 14 | Character size in pixels for image exports (bigger = larger chars, smaller = denser) |
 | Columns | auto | Output width in characters (auto preserves original image size) |
 | Dither | none | Dithering: none, floyd-steinberg, bayer, atkinson |
-| Export | auto | Format: txt, html, svg, png, gif, clipboard |
+| Export | auto (text→stdout, image→png, video→gif) | Format: txt, html, svg, png, gif, clipboard |
 
 ## How It Works
 

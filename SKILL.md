@@ -29,36 +29,166 @@ Determine what the user wants to convert:
 
 ## Options Prompt
 
-After detecting the input, **always ask the user to configure their options** using a single AskUserQuestion call. Pre-fill any options the user already specified in their message (via natural language parsing below), and present the rest with defaults highlighted.
+After detecting the input, **always ask the user to configure their options** using a single `AskUserQuestion` call with a `questions` array. Each question becomes a tab the user can fill out. Use type-specific questions.
 
-Use this format:
+**AskUserQuestion constraints**: 1-4 questions per call, 2-4 options per question. Use "Other" option for free-text input where the choices exceed 4.
 
+### For image input (4 questions):
+
+```json
+{
+  "questions": [
+    {
+      "question": "What art style do you want?",
+      "header": "Style",
+      "options": [
+        { "label": "Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
+        { "label": "Braille", "description": "Unicode braille dots — high detail, smooth look" },
+        { "label": "Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
+        { "label": "Other", "description": "Type: edge, dot-cross, halftone, retro-art, or terminal" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What color mode?",
+      "header": "Color",
+      "options": [
+        { "label": "Grayscale", "description": "White on dark — clean, classic look" },
+        { "label": "Full color", "description": "Preserve original image colors" },
+        { "label": "Matrix", "description": "Green on black — hacker terminal vibes" },
+        { "label": "Other", "description": "Type: amber, or custom color (e.g. coral, #ff6600)" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What aspect ratio?",
+      "header": "Ratio",
+      "options": [
+        { "label": "Original", "description": "Keep the image's original proportions" },
+        { "label": "16:9", "description": "Widescreen crop" },
+        { "label": "1:1", "description": "Square crop" },
+        { "label": "Other", "description": "Type: 4:3, 3:4, or 9:16" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What export format?",
+      "header": "Export",
+      "options": [
+        { "label": "PNG", "description": "Image file — best for sharing (default)" },
+        { "label": "HTML", "description": "Colored text in a web page" },
+        { "label": "SVG", "description": "Scalable vector — crisp at any size" },
+        { "label": "Other", "description": "Type: txt, clipboard" }
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
-Converting [filename/text] ([type]) to ASCII art.
 
-Pick your options (or reply "defaults" for all defaults, "random" for a surprise):
+### For text input (3 questions):
 
-1. Style: classic* | braille | block | edge | dot-cross | halftone | retro-art | terminal
-2. Color: grayscale* | full | matrix | amber | custom
-3. Background: dark* | light | transparent
-4. Ratio: original* | 16:9 | 4:3 | 1:1 | 3:4 | 9:16
-5. Font size: 14* (bigger = larger chars, smaller = denser art)
-6. Dither: none* | floyd-steinberg | bayer | atkinson
-7. Export: png* | html | svg | txt | gif | clipboard
-[8. Font (text only): standard* | doom | banner | slant | big | small | block | lean | mini | script | shadow | speed]
-[9. FPS (video only): 10*]
-
-* = default. Just list the numbers you want to change, e.g. "1. braille 2. matrix" or "defaults".
+```json
+{
+  "questions": [
+    {
+      "question": "What font style for your banner?",
+      "header": "Font",
+      "options": [
+        { "label": "Standard", "description": "Clean, readable default font" },
+        { "label": "Doom", "description": "Bold, dramatic block letters" },
+        { "label": "Slant", "description": "Italic-style angled text" },
+        { "label": "Other", "description": "Type: banner, big, small, block, lean, mini, script, shadow, speed" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What color mode?",
+      "header": "Color",
+      "options": [
+        { "label": "Grayscale", "description": "White on dark — classic terminal look" },
+        { "label": "Matrix", "description": "Green on black — hacker vibes" },
+        { "label": "Amber", "description": "Warm orange on dark — retro monitor" },
+        { "label": "Other", "description": "Type: full, or custom color (e.g. coral, #ff6600)" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What export format?",
+      "header": "Export",
+      "options": [
+        { "label": "Terminal", "description": "Print directly to stdout (default)" },
+        { "label": "TXT", "description": "Save as plain text file" },
+        { "label": "PNG", "description": "Render as image file" },
+        { "label": "Other", "description": "Type: html, svg, clipboard" }
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
 
-Rules:
-- Mark the default with `*` for each option
-- If the user already specified an option in their original message, show it as pre-selected with a checkmark: e.g. `1. Style: ~~classic~~ braille ✓ (from your request)`
-- Only show option 8 (Font) for text input and option 9 (FPS) for video input
-- If the user replies "defaults" or "default", use all defaults immediately
-- If the user replies "random" or "surprise me", use `--random` flag
-- If the user replies with partial changes like "1. braille 3. transparent", apply those and use defaults for the rest
-- Accept flexible response formats — numbered, comma-separated, or natural language like "braille with matrix color"
+### For video input (4 questions):
+
+```json
+{
+  "questions": [
+    {
+      "question": "What art style do you want?",
+      "header": "Style",
+      "options": [
+        { "label": "Classic", "description": "Traditional ASCII density ramp" },
+        { "label": "Braille", "description": "Unicode braille dots — high detail" },
+        { "label": "Block", "description": "Unicode block elements — bold, chunky" },
+        { "label": "Other", "description": "Type: edge, dot-cross, halftone, retro-art, or terminal" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What color mode?",
+      "header": "Color",
+      "options": [
+        { "label": "Grayscale", "description": "White on dark — clean, classic look" },
+        { "label": "Full color", "description": "Preserve original video colors" },
+        { "label": "Matrix", "description": "Green on black — hacker terminal vibes" },
+        { "label": "Other", "description": "Type: amber, or custom color" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What aspect ratio?",
+      "header": "Ratio",
+      "options": [
+        { "label": "Original", "description": "Keep the video's original proportions" },
+        { "label": "16:9", "description": "Widescreen crop" },
+        { "label": "1:1", "description": "Square crop" },
+        { "label": "Other", "description": "Type: 4:3, 3:4, or 9:16" }
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What export format?",
+      "header": "Export",
+      "options": [
+        { "label": "GIF", "description": "Animated ASCII art (default)" },
+        { "label": "PNG", "description": "First frame as image" },
+        { "label": "HTML", "description": "First frame as colored web page" },
+        { "label": "Other", "description": "Type: svg, txt" }
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+### Rules
+
+- If the user already specified an option in their message (via natural language parsing), pre-select it and skip that question
+- If all options are already specified or user says "defaults" / "just do it", skip the prompt entirely
+- If user says "random" or "surprise me", skip the prompt and use `--random` flag
+- When user selects "Other", use their typed text to determine the value
+- For options not covered by questions (dither, font-size, invert), use defaults. The user can request these in follow-up.
+- Map selected labels to CLI flags: "Classic" → `--style classic`, "Full color" → `--color full`, "Terminal" → no `--export` flag (stdout), etc.
 
 ## Natural Language Parsing
 
@@ -110,13 +240,15 @@ Use the venv Python to run the converter:
   [--filename <custom_name>]
 ```
 
-## Preview
+## Output
+
+All exported files are saved to an `ascii/` folder in the current working directory (created automatically if it doesn't exist).
 
 After conversion:
 
-- **Text input**: Print the FIGlet output directly to the user (it's already text)
-- **Image input**: The converter outputs a PNG file. Show the file path and use the Read tool to display it inline if possible.
-- **Video input**: First frame PNG + animated GIF. Show file paths.
+- **Text input**: Print the FIGlet output directly to the user (it's already text). If exported, show the file path.
+- **Image input**: The converter outputs a file to `ascii/`. Show the file path and use the Read tool to display it inline if possible.
+- **Video input**: First frame PNG + animated GIF saved to `ascii/`. Show file paths.
 
 ## Follow-up
 
