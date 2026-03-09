@@ -62,7 +62,7 @@ Do NOT include an "Other" option — the SDK always shows a free-text input wher
 | Option | Choices | Default |
 |--------|---------|---------|
 | Style | classic, braille, block, edge, dot-cross, halftone, retro-art, terminal | classic |
-| Color | grayscale, full, matrix, amber, custom (hex/named) | grayscale |
+| Color | grayscale, original, matrix, amber, custom (hex/named) | grayscale |
 | Ratio | original, 16:9, 4:3, 1:1, 3:4, 9:16 | original |
 | Background | dark, light, transparent | dark |
 | Dither | none, floyd-steinberg, bayer, atkinson | none |
@@ -74,7 +74,7 @@ Do NOT include an "Other" option — the SDK always shows a free-text input wher
 | Option | Choices | Default |
 |--------|---------|---------|
 | Font | standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed, ansi_shadow, ansi_regular | standard |
-| Color | grayscale, full, matrix, amber, custom | grayscale |
+| Color | grayscale, original, matrix, amber, custom | grayscale |
 | Background | dark, light, transparent | dark |
 | Export | terminal (stdout), txt, md, png, html, svg, clipboard | terminal |
 

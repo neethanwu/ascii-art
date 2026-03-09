@@ -49,7 +49,7 @@ def apply_color(
     Args:
         brightness: (rows, cols) float 0-255
         colors: (rows, cols, 3) uint8 original tile colors
-        mode: grayscale, full, matrix, amber, custom
+        mode: grayscale, original (or full), matrix, amber, custom
         background: dark or light
         custom_color: hex color for custom mode
 
@@ -60,7 +60,7 @@ def apply_color(
     result = np.zeros((rows, cols, 3), dtype=np.uint8)
     norm = np.clip(brightness / 255.0, 0, 1)
 
-    if mode == "full":
+    if mode in ("original", "full"):
         # Use original tile colors directly
         result = colors.copy()
 

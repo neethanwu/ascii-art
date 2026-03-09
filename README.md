@@ -5,7 +5,7 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 ## Features
 
 - **8 art styles**: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal
-- **5 color modes**: grayscale, full color, matrix green, amber, custom (hex or named colors)
+- **5 color modes**: grayscale, original (full RGB), matrix green, amber, custom (hex or named colors)
 - **3 dithering algorithms**: Floyd-Steinberg, Bayer, Atkinson
 - **7 export formats**: txt, md, html, svg, png, gif, clipboard
 - **3 background modes**: dark, light, transparent
@@ -57,7 +57,7 @@ The skill parses natural language and presents all options interactively — jus
 |--------|---------|-------------|
 | Style | classic | Art style for images/video: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal |
 | Font | standard | FIGlet font for text: standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed, ansi_shadow, ansi_regular |
-| Color | grayscale | Color mode: grayscale, full, matrix, amber, custom |
+| Color | grayscale | Color mode: grayscale, original, matrix, amber, custom |
 | Background | dark | Background: dark, light, transparent |
 | Ratio | original | Aspect ratio crop: original, 16:9, 4:3, 1:1, 3:4, 9:16 |
 | Font size | 14 | Character size in pixels for image exports (bigger = larger chars, smaller = denser) |

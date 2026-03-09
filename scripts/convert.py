@@ -57,13 +57,13 @@ RANDOM_COMBOS = [
     {"style": "classic", "color": "amber", "dither": "floyd-steinberg"},
     {"style": "braille", "color": "grayscale", "dither": "none"},
     {"style": "braille", "color": "matrix", "dither": "none"},
-    {"style": "block", "color": "full", "dither": "none"},
+    {"style": "block", "color": "original", "dither": "none"},
     {"style": "block", "color": "grayscale", "dither": "bayer"},
-    {"style": "classic", "color": "full", "dither": "atkinson"},
+    {"style": "classic", "color": "original", "dither": "atkinson"},
     {"style": "classic", "color": "grayscale", "dither": "floyd-steinberg"},
     {"style": "edge", "color": "grayscale", "dither": "none"},
     {"style": "edge", "color": "matrix", "dither": "none"},
-    {"style": "dot-cross", "color": "full", "dither": "bayer"},
+    {"style": "dot-cross", "color": "original", "dither": "bayer"},
     {"style": "halftone", "color": "grayscale", "dither": "floyd-steinberg"},
     {"style": "retro-art", "color": "amber", "dither": "atkinson"},
     {"style": "terminal", "color": "matrix", "dither": "none"},
@@ -372,7 +372,7 @@ def main():
                         default="original", help="Aspect ratio crop (default: original)")
 
     # Color
-    parser.add_argument("--color", choices=["grayscale", "full", "matrix", "amber", "custom"],
+    parser.add_argument("--color", choices=["grayscale", "original", "full", "matrix", "amber", "custom"],
                         default=None, help="Color mode (default: grayscale)")
     parser.add_argument("--custom-color", help="Hex color for custom mode (e.g. #ff6600)")
     parser.add_argument("--background", "-bg", choices=["dark", "light", "transparent"],
