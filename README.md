@@ -12,7 +12,7 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 - **Aspect ratio presets**: original, 16:9, 4:3, 1:1, 3:4, 9:16 (center-crop)
 - **Adjustable character size**: `--font-size` controls density in image exports
 - **Auto-sizing**: output matches original image dimensions by default
-- **Text input**: FIGlet banners with 11 font choices, all art styles apply to text too
+- **Text input**: FIGlet banners with 14 font choices (including ansi_shadow for block-style text)
 - **Video input**: frame extraction with animated GIF export
 - **Random mode**: curated style combinations for surprise results
 

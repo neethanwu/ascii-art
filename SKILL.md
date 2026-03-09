@@ -36,7 +36,7 @@ After detecting input, parse the user's message for any pre-specified options (s
 
 Use `questions` array (max 4 per call, 2-4 options per question). If >4 unresolved questions, split into multiple calls. List ALL available choices with numbers in the `question` text; put the top 3 picks as selectable options with an "Other" option for the rest.
 
-Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Style → Font → Color → Export → Background.
+Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Font → Color → Export → Background.
 
 Example question for Style:
 
@@ -74,11 +74,12 @@ Follow the same pattern for other options. The numbered list in the question tex
 
 | Option | Choices | Default |
 |--------|---------|---------|
-| Style | classic, braille, block, edge, dot-cross, halftone, retro-art, terminal | classic |
-| Font | standard, doom, banner, slant, big, small, lean, mini, script, shadow, speed | standard |
+| Font | standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed, ansi_shadow, ansi_regular | standard |
 | Color | grayscale, full, matrix, amber, custom | grayscale |
 | Background | dark, light, transparent | dark |
 | Export | terminal (stdout), txt, md, png, html, svg, clipboard | terminal |
+
+Note: Style (block, braille, etc.) only applies to image/video. Font only applies to text. "block" as a font and "block" as a style are different things — the agent should pick based on input type. For block-like text art, use `--font ansi_shadow` or `--font block`.
 
 
 Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `gold`). Translate creative descriptions ("sunset vibes") to hex.

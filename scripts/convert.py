@@ -274,122 +274,43 @@ def _figlet_to_grid(result: str) -> tuple[list[list[str]], int, int]:
     return chars, rows, cols
 
 
-def _apply_style_to_text(chars: list[list[str]], rows: int, cols: int, args):
-    """Apply art style to a FIGlet text grid. Returns (styled_chars, colors)."""
-    # Build brightness: non-space = 0 (dark/filled), space = 255 (bright/empty)
-    brightness = np.full((rows, cols), 255.0)
-    for r in range(rows):
-        for c in range(cols):
-            if chars[r][c] != " ":
-                brightness[r, c] = 0.0
-
-    # Apply dithering
-    dithered = apply_dither(brightness, args.dither, levels=5, strength=args.dither_strength)
-
-    # Apply style
-    style = args.style
-    if style == "block":
-        styled = block_style(dithered)
-    elif style == "braille":
-        # Braille needs high-res grid (4x2 per char) — upscale brightness
-        hi_res = np.repeat(np.repeat(brightness, 4, axis=0), 2, axis=1)
-        threshold = 128.0
-        styled = braille_style(hi_res, threshold=threshold)
-        # Braille changes dimensions
-        rows = len(styled)
-        cols = len(styled[0]) if rows > 0 else 0
-        brightness = brightness[:rows, :cols] if brightness.shape[0] >= rows else np.full((rows, cols), 255.0)
-    elif style == "dot-cross":
-        styled = dot_cross_style(dithered)
-    elif style == "halftone":
-        styled = halftone_style(dithered)
-    elif style == "edge":
-        # Edge detection doesn't make sense for text — fall through to classic
-        styled = classic_ascii(dithered)
-    elif style in PRESETS:
-        ramp = PRESETS[style]["ramp"]
-        styled = classic_ascii(dithered, ramp=ramp)
-    else:
-        styled = classic_ascii(dithered)
-
-    # Rebuild brightness for color (match styled dimensions)
-    s_rows = len(styled)
-    s_cols = len(styled[0]) if s_rows > 0 else 0
-    color_brightness = np.full((s_rows, s_cols), 255.0)
-    for r in range(s_rows):
-        for c in range(s_cols):
-            if styled[r][c] != " ":
-                color_brightness[r, c] = 0.0
-
-    pixel_colors = np.full((s_rows, s_cols, 3), 255, dtype=np.uint8)
-    colors = apply_color(color_brightness, pixel_colors, mode=args.color,
-                         background=args.background, custom_color=args.custom_color)
-    return styled, colors
-
-
 def convert_text(args) -> None:
     """Convert text to ASCII art banner."""
     result = render_text(args.input, font=args.font)
-    chars, rows, cols = _figlet_to_grid(result)
     input_name = args.input[:20].replace(" ", "_")
-
-    # Apply art style if not classic (classic keeps FIGlet chars as-is)
-    use_style = args.style != "classic"
+    chars, rows, cols = _figlet_to_grid(result)
 
     if args.export == "clipboard":
-        if use_style:
-            styled, _ = _apply_style_to_text(chars, rows, cols, args)
-            if export_clipboard_text(styled):
-                print("Copied to clipboard!")
-            else:
-                print("\n".join("".join(row) for row in styled))
+        if export_clipboard_text(chars):
+            print("Copied to clipboard!")
         else:
-            if export_clipboard_text(chars):
-                print("Copied to clipboard!")
-            else:
-                print(result)
+            print(result)
     elif args.export in ("html", "svg", "png"):
-        if use_style:
-            styled, colors = _apply_style_to_text(chars, rows, cols, args)
-        else:
-            brightness = np.full((rows, cols), 255.0)
-            pixel_colors = np.full((rows, cols, 3), 255, dtype=np.uint8)
-            colors = apply_color(brightness, pixel_colors, mode=args.color,
-                                 background=args.background, custom_color=args.custom_color)
-            styled = chars
+        brightness = np.full((rows, cols), 255.0)
+        pixel_colors = np.full((rows, cols, 3), 255, dtype=np.uint8)
+        colors = apply_color(brightness, pixel_colors, mode=args.color,
+                             background=args.background, custom_color=args.custom_color)
 
         fs = args.font_size
         if args.export == "html":
-            path = export_html(styled, colors, input_name, background=args.background,
+            path = export_html(chars, colors, input_name, background=args.background,
                               font_size=fs, filename=args.filename)
         elif args.export == "svg":
-            path = export_svg(styled, colors, input_name, background=args.background,
+            path = export_svg(chars, colors, input_name, background=args.background,
                              font_size=fs, filename=args.filename)
         else:
-            path = export_png(styled, colors, input_name, background=args.background,
+            path = export_png(chars, colors, input_name, background=args.background,
                              font_size=fs, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "txt":
-        if use_style:
-            styled, _ = _apply_style_to_text(chars, rows, cols, args)
-            path = export_txt(styled, input_name, filename=args.filename)
-        else:
-            path = export_txt(chars, input_name, filename=args.filename)
+        path = export_txt(chars, input_name, filename=args.filename)
         print(f"Exported: {path}")
     elif args.export == "md":
-        if use_style:
-            styled, _ = _apply_style_to_text(chars, rows, cols, args)
-            path = export_md(styled, input_name, filename=args.filename)
-        else:
-            path = export_md(chars, input_name, filename=args.filename)
+        path = export_md(chars, input_name, filename=args.filename)
         print(f"Exported: {path}")
     else:
         # Default: print to stdout
-        if use_style:
-            styled, _ = _apply_style_to_text(chars, rows, cols, args)
-            print("\n".join("".join(row) for row in styled))
-        else:
-            print(result)
+        print(result)
 
 
 def _do_export(args, chars, colors, input_name):
