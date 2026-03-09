@@ -4,7 +4,7 @@ import pyfiglet
 
 AVAILABLE_FONTS = [
     "standard", "doom", "banner", "slant", "big", "small",
-    "block", "lean", "mini", "script", "shadow", "speed",
+    "lean", "mini", "script", "shadow", "speed",
 ]
 
 MAX_TEXT_LENGTH = 100

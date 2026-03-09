@@ -53,6 +53,15 @@ def export_txt(chars: list[list[str]], input_name: str, filename: Optional[str] 
     return path
 
 
+def export_md(chars: list[list[str]], input_name: str, filename: Optional[str] = None) -> str:
+    """Export as markdown file with ASCII art in a fenced code block."""
+    text = "\n".join("".join(row) for row in chars)
+    md = f"```\n{text}\n```\n"
+    path = make_output_path(input_name, "md", filename)
+    Path(path).write_text(md, encoding="utf-8")
+    return path
+
+
 def export_html(
     chars: list[list[str]],
     colors: np.ndarray,

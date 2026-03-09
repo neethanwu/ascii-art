@@ -7,12 +7,12 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 - **8 art styles**: classic, braille, block, edge, dot-cross, halftone, retro-art, terminal
 - **5 color modes**: grayscale, full color, matrix green, amber, custom (hex or named colors)
 - **3 dithering algorithms**: Floyd-Steinberg, Bayer, Atkinson
-- **6 export formats**: txt, html, svg, png, gif, clipboard
+- **7 export formats**: txt, md, html, svg, png, gif, clipboard
 - **3 background modes**: dark, light, transparent
 - **Aspect ratio presets**: original, 16:9, 4:3, 1:1, 3:4, 9:16 (center-crop)
 - **Adjustable character size**: `--font-size` controls density in image exports
 - **Auto-sizing**: output matches original image dimensions by default
-- **Text input**: FIGlet banners with 12 font choices
+- **Text input**: FIGlet banners with 11 font choices, all art styles apply to text too
 - **Video input**: frame extraction with animated GIF export
 - **Random mode**: curated style combinations for surprise results
 
@@ -26,6 +26,12 @@ Or clone manually:
 
 ```bash
 git clone https://github.com/neethanwu/ascii-art.git ~/.claude/skills/ascii-art
+```
+
+Optionally pre-install dependencies (otherwise runs automatically on first use):
+
+```bash
+bash ~/.claude/skills/ascii-art/scripts/setup.sh
 ```
 
 The skill is defined in `SKILL.md` — any agent that reads skill files can use it.
@@ -55,7 +61,7 @@ The skill parses natural language and presents all options interactively — jus
 | Font size | 14 | Character size in pixels for image exports (bigger = larger chars, smaller = denser) |
 | Columns | auto | Output width in characters (auto preserves original image size) |
 | Dither | none | Dithering: none, floyd-steinberg, bayer, atkinson |
-| Export | auto (text→stdout, image→png, video→gif) | Format: txt, html, svg, png, gif, clipboard |
+| Export | auto (text→stdout, image→png, video→gif) | Format: txt, md, html, svg, png, gif, clipboard |
 
 ## How It Works
 

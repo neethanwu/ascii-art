@@ -36,25 +36,25 @@ After detecting input, parse the user's message for any pre-specified options (s
 
 Use `questions` array (max 4 per call, 2-4 options per question). If >4 unresolved questions, split into multiple calls. List ALL available choices with numbers in the `question` text; put the top 3 picks as selectable options with an "Other" option for the rest.
 
-Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Font → Color → Export → Background.
+Priority order — **image/video**: Style → Color → Export → Ratio → Background → Dither. **Text**: Style → Font → Color → Export → Background.
 
 Example question for Style:
 
 ```json
 {
-  "question": "What art style? Options: 1.classic 2.braille 3.block 4.edge 5.dot-cross 6.halftone 7.retro-art 8.terminal",
+  "question": "What art style? 1.Classic 2.Braille 3.Block 4.Edge 5.Dot-cross 6.Halftone 7.Retro-art 8.Terminal",
   "header": "Style",
   "options": [
-    { "label": "Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
-    { "label": "Braille", "description": "Unicode braille dots — high detail, smooth" },
-    { "label": "Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
-    { "label": "Other", "description": "Type a number or name for: edge, dot-cross, halftone, retro-art, terminal" }
+    { "label": "1. Classic", "description": "Traditional ASCII density ramp (@%#*+=-:. )" },
+    { "label": "2. Braille", "description": "Unicode braille dots — high detail, smooth" },
+    { "label": "3. Block", "description": "Unicode block elements (█▓▒░) — bold, chunky" },
+    { "label": "Other", "description": "Type a number or name for: 4.Edge 5.Dot-cross 6.Halftone 7.Retro-art 8.Terminal" }
   ],
   "multiSelect": false
 }
 ```
 
-Follow the same pattern for other options. For each, put the default as the first selectable option. When user selects "Other", map their typed number or name to the correct value.
+Follow the same pattern for other options. The numbered list in the question text must match the order of selectable options — put the default as option 1, and ensure "Other" references the remaining numbers. When user selects "Other", map their typed number or name to the correct value.
 
 ### Available options by type
 
@@ -68,16 +68,18 @@ Follow the same pattern for other options. For each, put the default as the firs
 | Background | dark, light, transparent | dark |
 | Dither | none, floyd-steinberg, bayer, atkinson | none |
 | Font size | 6-30 px | 14 |
-| Export | png, html, svg, txt, clipboard (image default: png, video default: gif) | auto |
+| Export | png, html, svg, txt, md, clipboard (image default: png, video default: gif) | auto |
 
 **Text options:**
 
 | Option | Choices | Default |
 |--------|---------|---------|
-| Font | standard, doom, banner, slant, big, small, block, lean, mini, script, shadow, speed | standard |
+| Style | classic, braille, block, edge, dot-cross, halftone, retro-art, terminal | classic |
+| Font | standard, doom, banner, slant, big, small, lean, mini, script, shadow, speed | standard |
 | Color | grayscale, full, matrix, amber, custom | grayscale |
 | Background | dark, light, transparent | dark |
-| Export | terminal (stdout), txt, png, html, svg, clipboard | terminal |
+| Export | terminal (stdout), txt, md, png, html, svg, clipboard | terminal |
+
 
 Custom colors: supports hex (`#ff6600`) or named colors (`coral`, `skyblue`, `gold`). Translate creative descriptions ("sunset vibes") to hex.
 
