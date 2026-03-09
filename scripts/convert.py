@@ -393,7 +393,7 @@ def main():
 
     # Export
     parser.add_argument("--export", "-e",
-                        choices=["txt", "md", "html", "svg", "png", "gif", "clipboard"],
+                        choices=["terminal", "txt", "md", "html", "svg", "png", "gif", "clipboard"],
                         help="Export format (default: auto)")
     parser.add_argument("--filename", "-o", help="Custom output filename")
     parser.add_argument("--font-size", type=int, default=14,
@@ -409,6 +409,10 @@ def main():
         args.dither = combo["dither"]
         print(f"Random mode: style={args.style}, color={args.color}, dither={args.dither}",
               file=sys.stderr)
+
+    # Normalize "terminal" export to None (stdout)
+    if args.export == "terminal":
+        args.export = None
 
     # Apply preset overrides (must come after random mode, before routing)
     _apply_preset(args)
