@@ -16,9 +16,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-info()  { echo -e "${GREEN}[ascii-gen]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[ascii-gen]${NC} $1"; }
-error() { echo -e "${RED}[ascii-gen]${NC} $1" >&2; }
+info()  { echo -e "${GREEN}[ascii-art]${NC} $1"; }
+warn()  { echo -e "${YELLOW}[ascii-art]${NC} $1"; }
+error() { echo -e "${RED}[ascii-art]${NC} $1" >&2; }
 
 # Fast path: already set up
 if [ -f "$MARKER" ]; then

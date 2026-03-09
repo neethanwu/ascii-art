@@ -16,10 +16,14 @@ An agent skill that converts text, images, and video to ASCII art. Works with an
 
 ## Install
 
-Clone the repo into your agent's skill directory:
+```bash
+npx skills add https://github.com/neethanwu/ascii-art --skill ascii-art
+```
+
+Or clone manually:
 
 ```bash
-git clone https://github.com/yourname/ascii-gen ~/.claude/skills/ascii-gen
+git clone https://github.com/neethanwu/ascii-art.git ~/.claude/skills/ascii-art
 ```
 
 The skill is defined in `SKILL.md` — any agent that reads skill files can use it.
