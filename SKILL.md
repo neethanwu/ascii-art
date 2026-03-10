@@ -16,20 +16,12 @@ bash {{SKILL_DIR}}/scripts/setup.sh
 ## Input Detection
 
 1. **File path** → check extension: `.jpg/.jpeg/.png/.webp/.bmp/.tiff` → **image**, `.mp4/.webm/.avi/.mov/.mkv` → **video**, `.gif` → check if animated (video) or static (image)
-2. **Pasted/attached image** → **save IMMEDIATELY** before doing anything else:
+2. **Pasted/attached image** → **save IMMEDIATELY** before doing anything else. Run:
    ```bash
-   mkdir -p ascii/tmp
+   python3 {{SKILL_DIR}}/scripts/save_image.py <source_path>
    ```
-   Then use Python to save the image from the conversation to disk:
-   ```bash
-   python3 -c "
-   import base64, sys
-   data = base64.b64decode(sys.argv[1])
-   with open(sys.argv[2], 'wb') as f: f.write(data)
-   " "BASE64_IMAGE_DATA" "ascii/tmp/input_$(date +%H%M%S).png"
-   ```
-   If the image was dragged from Finder or has a known file path, just `cp` it instead.
-   If you cannot extract the image data, ask the user: "Please save the image to a file and share the path (e.g. `~/Downloads/photo.jpg`)."
+   The script copies the image to `ascii/tmp/` with a timestamped name and prints the saved path to stdout. Use that output path as `--input` for conversion.
+   `<source_path>` is the temp file path from the attachment. If you cannot determine the source path, ask the user: "Please provide the file path (e.g. `~/Downloads/photo.jpg`)."
    **Do NOT proceed to options until you have a valid file path on disk.**
 3. **Plain text** (no file, or file doesn't exist) → **text** (FIGlet banner)
 4. **Nothing provided** → ask what they want to convert
