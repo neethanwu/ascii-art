@@ -16,11 +16,23 @@ bash {{SKILL_DIR}}/scripts/setup.sh
 ## Input Detection
 
 1. **File path** → check extension: `.jpg/.jpeg/.png/.webp/.bmp/.tiff` → **image**, `.mp4/.webm/.avi/.mov/.mkv` → **video**, `.gif` → check if animated (video) or static (image)
-2. **Pasted/attached image** → **save IMMEDIATELY** before doing anything else. Use a timestamped name to avoid conflicts: `mkdir -p ascii/tmp && cp /path/to/attached/image ascii/tmp/input_$(date +%H%M%S).png`. Store the saved path for the conversion step. This is now an **image** input.
+2. **Pasted/attached image** → **save IMMEDIATELY** before doing anything else:
+   ```bash
+   mkdir -p ascii/tmp
+   ```
+   Then use Python to save the image from the conversation to disk:
+   ```bash
+   python3 -c "
+   import base64, sys
+   data = base64.b64decode(sys.argv[1])
+   with open(sys.argv[2], 'wb') as f: f.write(data)
+   " "BASE64_IMAGE_DATA" "ascii/tmp/input_$(date +%H%M%S).png"
+   ```
+   If the image was dragged from Finder or has a known file path, just `cp` it instead.
+   If you cannot extract the image data, ask the user: "Please save the image to a file and share the path (e.g. `~/Downloads/photo.jpg`)."
+   **Do NOT proceed to options until you have a valid file path on disk.**
 3. **Plain text** (no file, or file doesn't exist) → **text** (FIGlet banner)
 4. **Nothing provided** → ask what they want to convert
-
-**Important**: Always resolve the input file path BEFORE prompting options. Never ask for a file path after options — you should already have it from step 1 or 2.
 
 ## Options Prompt
 
