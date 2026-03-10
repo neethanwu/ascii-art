@@ -18,10 +18,10 @@ bash {{SKILL_DIR}}/scripts/setup.sh
 1. **File path** → check extension: `.jpg/.jpeg/.png/.webp/.bmp/.tiff` → **image**, `.mp4/.webm/.avi/.mov/.mkv` → **video**, `.gif` → check if animated (video) or static (image)
 2. **Pasted/attached image** → **save IMMEDIATELY** before doing anything else. Run:
    ```bash
-   python3 {{SKILL_DIR}}/scripts/save_image.py <source_path>
+   {{SKILL_DIR}}/scripts/.venv/bin/python {{SKILL_DIR}}/scripts/save_image.py --clipboard
    ```
-   The script copies the image to `ascii/tmp/` with a timestamped name and prints the saved path to stdout. Use that output path as `--input` for conversion.
-   `<source_path>` is the temp file path from the attachment. If you cannot determine the source path, ask the user: "Please provide the file path (e.g. `~/Downloads/photo.jpg`)."
+   This grabs the image from the system clipboard (still there after paste), saves to `ascii/tmp/` with a timestamped name, and prints the saved path to stdout. Use that output path as `--input`.
+   If `--clipboard` fails (no image in clipboard), fall back to asking: "Please provide the file path (e.g. `~/Downloads/photo.jpg`)." You can also pass a known file path directly: `save_image.py <path>`.
    **Do NOT proceed to options until you have a valid file path on disk.**
 3. **Plain text** (no file, or file doesn't exist) → **text** (FIGlet banner)
 4. **Nothing provided** → ask what they want to convert
